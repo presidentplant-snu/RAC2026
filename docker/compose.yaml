@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  px4_sim:
+    build:
+      context: ./px4_sim/
+    container_name: rac2026_px4_sim
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ../:/app
+    devices:
+      - /dev/dri
+    network_mode: host
+    stdin_open: true
+    tty: true
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - capabilities: [ gpu ]
+  ros2:
+    build:
+      context: ./ros2/
+    container_name: rac2026_ros2
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ../:/app
+    devices:
+      - /dev/dri
+    network_mode: host
+    stdin_open: true
+    tty: true
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - capabilities: [ gpu ]
