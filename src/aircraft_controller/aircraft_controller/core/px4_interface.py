@@ -8,7 +8,6 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
 from abc import ABC, abstractmethod
 import numpy as np
-import pymap3d as p3d
 
 
 # PX4 Messages - Subscriptions
