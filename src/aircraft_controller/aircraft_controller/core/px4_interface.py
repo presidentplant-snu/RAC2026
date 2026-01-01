@@ -119,9 +119,11 @@ class PX4Interface(Node, ABC):
 
     def _create_subscribers(self):
         """Create all PX4 message subscribers"""
+
+        # TODO: bug with px4, it should be vehicle_status but it's vehicle_status_v1
         self._vehicle_status_subscriber = self.create_subscription(
             VehicleStatus,
-            "/fmu/out/vehicle_status",
+            "/fmu/out/vehicle_status_v1",
             self._vehicle_status_callback,
             self.qos_profile,
         )
@@ -278,8 +280,9 @@ class PX4Interface(Node, ABC):
         self.yaw = msg.heading
 
         # Use for Lidar / Optical Flow. Technically shouldn't be needed when using RTK GPS.
-        if not msg.dist_bottom_valid:
-            self.get_logger().warn("dist bottom invalid")
+        # For SITL, just ignore because error's spammed.
+        #if not msg.dist_bottom_valid:
+            #self.get_logger().warn("dist bottom invalid")
 
         self.dist_bottom = msg.dist_bottom
 
@@ -462,6 +465,12 @@ class PX4Interface(Node, ABC):
         if self._vehicle_status is None:
             raise RuntimeError("Vehicle status not available")
         return self._vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_MISSION
+
+    def is_takeoff_mode(self):
+        """Check if vehicle is in auto takeoff mode"""
+        return (
+            self.vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_TAKEOFF
+        )
 
     # =======================================
     # Vehicle Command Helper Functions

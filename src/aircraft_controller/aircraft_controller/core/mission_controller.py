@@ -65,49 +65,37 @@ class MissionController(AircraftCommands):
             self.get_logger().error(f"No handler defined for state: {self.current_state.value}")
     
 
-        def transition_to(self, new_state: Enum) -> None:
-            if new_state == self.current_state:
-                # There are some instances where "resetting" a state might be needed,
-                # However, it's uncommon enough to warrant a warning.
-                self.get_logger().warn("Switching to same state")
+    def transition_to(self, new_state: Enum) -> None:
+        if new_state == self.current_state:
+            # There are some instances where "resetting" a state might be needed,
+            # However, it's uncommon enough to warrant a warning.
+            self.get_logger().warn("Switching to same state")
 
-            old_state = self.current_state
-            self.current_state = new_state
-            self.state_start_time = self.get_clock().now().nanoseconds / 1e9
-            
-            self.get_logger().info(f"State transition: {old_state.value} -> {new_state.value}")
+        old_state = self.current_state
+        self.current_state = new_state
+        self.state_start_time = self.get_clock().now().nanoseconds / 1e9
+        
+        self.get_logger().info(f"State transition: {old_state.value} -> {new_state.value}")
 
-        def wait_for_duration(self, duration: float) -> bool:
-            """
-            Check if duration has elapsed in current state.
-            Useful for timed holds, delays, etc.
-            """
-            return self.get_state_time() >= duration
+    def wait_for_duration(self, duration: float) -> bool:
+        """
+        Check if duration has elapsed in current state.
+        Useful for timed holds, delays, etc.
+        """
+        return self.get_state_time() >= duration
 
 
-        def handle_init(self) -> bool:
-            """
-            Default initialization handler.
-            Waits for vehicle data and sets home position.
-            
-            Override this if you need custom initialization.
-            Call super().handle_init() if you want default behavior.
-            
-            Example:
-                def handle_init(self):
-                    # Call default init
-                    super().handle_init()
-                    
-                    # Check if home set (default init complete)
-                    if not np.all(np.isnan(self.home_position)):
-                        # Do custom initialization
-                        self.waypoints = self.calculate_waypoints()
-                        self.transition_to(MyStates.PREFLIGHT)
-            """
-            if not self._vehicle_status:
-                return False
-            
-            if not self._vehicle_global_position:
-                return False
+    def is_initialized(self) -> bool:
+        """
+        Default initialization handler.
+        Returns True only if vehicle is good
+        """
+        if not self._vehicle_status:
+            print("status")
+            return False
+        
+        if not self._vehicle_global_position:
+            print("global pos")
+            return False
 
-            return True
+        return True

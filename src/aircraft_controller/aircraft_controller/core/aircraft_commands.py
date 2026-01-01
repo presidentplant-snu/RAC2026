@@ -63,8 +63,8 @@ class AircraftCommands(PX4Interface):
         if not self._saved_state:
             self.save_state()
 
-        target_pos = self.saved_pos + target_pos
-        
+        target_pos = self._saved_pos + target_pos
+
         if self.goto_position(target_pos, target_yaw):
             self.clear_saved_state()
             return True
@@ -98,14 +98,15 @@ class AircraftCommands(PX4Interface):
         if not self._saved_state:
             self.save_state()
 
-        target_pos = self.saved_pos
+        target_pos = self._saved_pos.copy()
 
-        alt_delta = target_alt - self.pos_gps[:2]
+        alt_delta = target_alt - self.pos_gps[2]
         
         # Subtract since LLA up is +ve and NED up is -ve 
         # i.e. Increase in altitude (alt_delta > 0) means decrease in D coordinate
-        target_pos[2] -= alt_delta 
+        target_pos[2] = target_pos[2] - alt_delta 
         
+        print(target_pos, self.pos)
         if self.goto_position(target_pos, target_yaw):
             self.clear_saved_state()
             return True
@@ -127,7 +128,7 @@ class AircraftCommands(PX4Interface):
         if not self._saved_state:
             self.save_state()
 
-        target_pos = self.saved_pos
+        target_pos = self._saved_pos
         
         alt_delta = target_dist - self.dist_bottom
         

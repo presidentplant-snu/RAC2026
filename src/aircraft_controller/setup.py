@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'ac_sample = aircraft_controller.ac_sample:main',
             # TODO: Add Entrypoints
         ],
     },
