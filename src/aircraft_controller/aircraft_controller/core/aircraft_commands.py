@@ -50,6 +50,19 @@ class AircraftCommands(PX4Interface):
         self.publish_trajectory_setpoint(pos_sp=target_pos, yaw_sp=target_yaw)
         return self.is_at_position(target_pos,target_yaw)
 
+    def goto_position_global(
+        self,
+        target_pos_global: np.ndarray,
+        target_yaw: float | None = None
+    ) -> bool:
+        """
+            Sends a trajectory setpoint to position (LLA, WGS84 coords)
+            returns True if aircraft is at said position.
+        """
+        target_pos = self._convert_gps_to_local(target_pos_global)
+        self.publish_trajectory_setpoint(pos_sp=target_pos, yaw_sp=target_yaw)
+        return self.is_at_position(target_pos,target_yaw)
+
     def goto_altitude(
         self, 
         target_alt: float,
@@ -163,3 +176,12 @@ class AircraftCommands(PX4Interface):
         self._saved_yaw = None
 
         return
+
+    def _convert_gps_to_local(self, global_pos: np.ndarray):
+        """ Convert global LLA coordinates to NED coordinates """
+        x,y,z = p3d.geodetic2ned(
+                global_pos[0], global_pos[1], global_pos[2],
+                self.origin_pos[0], self.origin_pos[1], self.origin_pos[2],
+                )
+
+        return np.array([x,y,z])

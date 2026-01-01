@@ -98,10 +98,8 @@ class PX4Interface(Node, ABC):
         # Quaternion [w, x, y, z]
         self.attitude_q: np.ndarray = np.array([np.nan, np.nan, np.nan, np.nan]) 
 
-        # Home position (reference frame origin)
-        self.home_position: np.ndarray = np.array([np.nan, np.nan, np.nan])
-        self.home_position_gps: np.ndarray= np.array([np.nan, np.nan, np.nan])
-        self.home_yaw: float = np.nan
+        # Home position (reference frame origin for LLA)
+        self.origin_pos: np.ndarray = np.array([np.nan, np.nan, np.nan])
 
         # Mission state
         self.mission_wp_current: int = -1
@@ -279,13 +277,16 @@ class PX4Interface(Node, ABC):
         self.vel = np.array([msg.vx, msg.vy, msg.vz])
         self.yaw = msg.heading
 
-
         # Use for Lidar / Optical Flow. Technically shouldn't be needed when using RTK GPS.
         if not msg.dist_bottom_valid:
             self.get_logger().warn("dist bottom invalid")
 
         self.dist_bottom = msg.dist_bottom
-         
+
+        if not (msg.xy_global and msg.z_global):
+            self.get_logger().warn("Reference position invalid")
+        else:
+            self.origin_pos = np.array([msg.ref_lat, msg.ref_lon, msg.ref_alt])
 
     def _vehicle_global_position_callback(self, msg: VehicleGlobalPosition):
         """Callback for vehicle_global_position UORB message"""
@@ -401,7 +402,7 @@ class PX4Interface(Node, ABC):
         Publish trajectory setpoint for offboard control.
         
         Args:
-            pos_sp: Position setpoint in NED frame relative to home (m)
+            pos_sp: Position setpoint in NED frame relative to EKF2 Origin (m)
             vel_sp: Velocity setpoint in NED frame (m/s)
             yaw_sp: Yaw setpoint (radians)
         """
