@@ -50,6 +50,27 @@ class AircraftCommands(PX4Interface):
         self.publish_trajectory_setpoint(pos_sp=target_pos, yaw_sp=target_yaw)
         return self.is_at_position(target_pos,target_yaw)
 
+    def goto_position_rel(
+        self, 
+        target_pos: np.ndarray, 
+        target_yaw: float | None = None
+    ) -> bool:
+        """
+            Sends a trajectory setpoint to position relative to position when first called.
+            returns True if aircraft is at said position.
+        """
+
+        if not self._saved_state:
+            self.save_state()
+
+        target_pos = self.saved_pos + target_pos
+        
+        if self.goto_position(target_pos, target_yaw):
+            self.clear_saved_state()
+            return True
+        else:
+            return False
+
     def goto_position_global(
         self,
         target_pos_global: np.ndarray,
