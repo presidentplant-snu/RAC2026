@@ -43,7 +43,8 @@ class AircraftCommands(PX4Interface):
         target_yaw: float | None = None
     ) -> bool:
         """
-            Goes to position and returns if aircraft is at said position.
+            Sends a trajectory setpoint to position.
+            returns True if aircraft is at said position.
         """
 
         self.publish_trajectory_setpoint(pos_sp=target_pos, yaw_sp=target_yaw)
@@ -72,7 +73,37 @@ class AircraftCommands(PX4Interface):
         target_pos[2] -= alt_delta 
         
         if self.goto_position(target_pos, target_yaw):
-            self._saved_state = False
+            self.clear_saved_state()
+            return True
+        else:
+            return False
+
+    def goto_terrain_dist(
+        self, 
+        target_dist: float,
+        target_yaw: float | None = None
+    ) -> bool:
+        """
+            Goes to set distance from ground (meters) and returns if aircraft is at said distance.
+            Needs distance sensor. https://docs.px4.io/main/en/sensor/rangefinders
+            Holds lateral position and yaw with the saved state
+        """
+        
+        # Note: since we always populate self.saved_* before, there *shouldn't* be any logical errors.
+        if not self._saved_state:
+            self.save_state()
+
+        target_pos = self.saved_pos
+        
+        alt_delta = target_dist - self.dist_bottom
+        
+        # Subtract since increase in distance is +ve and NED up is -ve 
+        # i.e. Increase in distance = Increase in altitude means decrease in D coordinate
+
+        target_pos[2] -= alt_delta 
+        
+        if self.goto_position(target_pos, target_yaw):
+            self.clear_saved_state()
             return True
         else:
             return False
@@ -87,7 +118,7 @@ class AircraftCommands(PX4Interface):
             self.save_state()
 
         if self.goto_position(self._saved_pos, self._saved_yaw):
-            self._saved_state = False
+            self.clear_saved_state()
             return True
         else:
             return False
@@ -120,11 +151,15 @@ class AircraftCommands(PX4Interface):
         self._saved_pos_gps = self.pos_gps
         self._saved_yaw = self.yaw
 
+        return
+
     def clear_saved_state(self) -> None:
         self._saved_state = False
 
         # Set these to None so it throws an error if saved data is used before actually saving state.
+        # This can cause warnings for typecheckers. (There might be a better way, leave that as TODO for now.)
         self._saved_pos = None
         self._saved_pos_gps = None
         self._saved_yaw = None
+
         return
