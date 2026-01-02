@@ -18,7 +18,8 @@ from px4_msgs.msg import (
     VehicleAttitude,
     VehicleGlobalPosition,
     SensorGps,
-    MissionResult
+    MissionResult,
+    LandingTargetPose
 )
 
 # PX4 Messages - Publications
@@ -26,6 +27,7 @@ from px4_msgs.msg import (
     VehicleCommand,
     OffboardControlMode,
     TrajectorySetpoint,
+    IrlockReport
 )
 
 # TODO: helper function for MAV_CMD_DO_SET_ACTUATOR 
@@ -65,6 +67,7 @@ class PX4Interface(Node, ABC):
         self._vehicle_attitude: VehicleAttitude | None = None
         self._vehicle_gps: SensorGps | None = None
         self._mission_result: MissionResult | None = None
+        self._landing_target_pose: LandingTargetPose | None = None
 
         # Offboard control mode configuration
         self.offboard_control_mode_params = {
@@ -104,6 +107,10 @@ class PX4Interface(Node, ABC):
         # Mission state
         self.mission_wp_current: int = -1
         self.mission_wp_reached: int = -1
+
+        # Landing target
+        self.landing_target_valid: bool = False
+        self.landing_target_pos: np.ndarray = np.array([np.nan, np.nan, np.nan])
 
         # Heartbeat monitoring
         self.last_heartbeat_time: rclpy.time.Time | None = None
@@ -170,6 +177,13 @@ class PX4Interface(Node, ABC):
             self.qos_profile,
         )
     
+        self._vehicle_mission_subscriber = self.create_subscription(
+            LandingTargetPose,
+            "/fmu/out/landing_target_pose",
+            self._landing_target_pose_callback,
+            self.qos_profile,
+        )
+
     def _create_publishers(self):
         """Create all PX4 message publishers"""
         self._vehicle_command_publisher = self.create_publisher(
@@ -184,6 +198,10 @@ class PX4Interface(Node, ABC):
             TrajectorySetpoint, "/fmu/in/trajectory_setpoint", self.qos_profile
         )
     
+        self._irlock_report_publisher = self.create_publisher(
+            IrlockReport, "/fmu/in/irlock_report", self.qos_profile
+        )
+
     def _setup_timers(self, timer_period:float = 0.01):
         """Setup ROS2 timers"""
 
@@ -315,6 +333,16 @@ class PX4Interface(Node, ABC):
         self.mission_wp_current = msg.seq_current
         self.mission_wp_reached = msg.seq_reached
     
+    def _landing_target_pose_callback(self, msg: LandingTargetPose):
+        """Callback for landing_target_pose UORB message"""
+
+        # TODO: Check how this works out with regards to landing_target_valid etc.
+        # This should be published everytime irlock report is sent out.
+        self._landing_target_pose = msg
+
+        self.landing_target_valid = bool(msg.abs_pos_valid)
+        self.landing_target_pos = np.array([msg.x_abs, msg.y_abs, msg.z_abs]) # NED 
+
     # ============================== 
     # Publication Callbacks
     # ============================== 
@@ -439,6 +467,14 @@ class PX4Interface(Node, ABC):
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self._trajectory_setpoint_publisher.publish(msg)       
     
+        def publish_irlock_report(self, pos_x: float, pos_y: float):
+            msg = IrlockReport()
+
+            msg.pos_x = pos_x
+            msg.pos_y = pos_y
+
+            self._irlock_report_publisher.publish(msg)
+
     # =======================================
     # Vehicle State Helper Functions (can be added on a per-use basis)
     # =======================================
