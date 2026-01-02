@@ -344,14 +344,14 @@ class PX4Interface(Node, ABC):
             target_component: Target component ID (default: 1)
         """
         msg = VehicleCommand()
-        msg.command = command
-        msg.param1 = param1
-        msg.param2 = param2
-        msg.param3 = param3
-        msg.param4 = param4
-        msg.param5 = param5
-        msg.param6 = param6
-        msg.param7 = param7
+        msg.command = int(command)
+        msg.param1 = float(param1)
+        msg.param2 = float(param2)
+        msg.param3 = float(param3)
+        msg.param4 = float(param4)
+        msg.param5 = float(param5)
+        msg.param6 = float(param6)
+        msg.param7 = float(param7)
 
         msg.target_system = target_system
         msg.target_component = target_component
@@ -419,23 +419,22 @@ class PX4Interface(Node, ABC):
             # finding that out was *not* fun.
             self.get_logger().warn("Not in offboard mode, blocking setpoint")
             return
-
         
         msg = TrajectorySetpoint()
 
         if pos_sp is not None:
-            msg.position = list(pos_sp)
+            msg.position = list(map(float,pos_sp))
         else:
             msg.position = [float('nan')] * 3
         
         # Velocity
         if vel_sp is not None:
-            msg.velocity = list(vel_sp)
+            msg.velocity = list(map(float,vel_sp))
         else:
             msg.velocity = [float('nan')] * 3
         
         # Yaw
-        msg.yaw = yaw_sp if yaw_sp is not None else float('nan')
+        msg.yaw = float(yaw_sp) if yaw_sp is not None else float('nan')
         
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self._trajectory_setpoint_publisher.publish(msg)       
@@ -468,8 +467,25 @@ class PX4Interface(Node, ABC):
 
     def is_takeoff_mode(self):
         """Check if vehicle is in auto takeoff mode"""
+        if self._vehicle_status is None:
+            raise RuntimeError("Vehicle status not available")
         return (
-            self.vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_TAKEOFF
+            self._vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_TAKEOFF
+        )
+
+    def is_hold_mode(self):
+        """Check if vehicle is in hold ( = loiter for FW ) mode """
+        if self._vehicle_status is None:
+            raise RuntimeError("Vehicle status not available")
+        return (
+            self._vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_LOITER
+        )
+    def is_landing_mode(self):
+        """Check if vehicle is in auto takeoff mode"""
+        if self._vehicle_status is None:
+            raise RuntimeError("Vehicle status not available")
+        return (
+            self._vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_LAND
         )
 
     # =======================================
@@ -477,39 +493,44 @@ class PX4Interface(Node, ABC):
     # =======================================
 
     def arm(self):
-        """Arm the vehicle"""
+        """Arm the vehicle. Returns true when armed"""
         if self.is_armed():
-            self.get_logger().info("Vehicle already armed")
-            return
+            return True
 
         self.publish_vehicle_command(
             VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=1.0
         )
         self.get_logger().info("Arm command sent")
 
-    def disarm(self):
-        """Disarm the vehicle"""
+        return False
+
+    def disarm(self) -> bool:
+        """Disarm the vehicle. Returns true when disarmed"""
         if self.is_disarmed():
             self.get_logger().info("Vehicle already disarmed")
-            return
+            return True
 
         self.publish_vehicle_command(
             VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=0.0
         )
         self.get_logger().info("Disarm command sent")
 
+        return False
+
     def set_offboard_mode(self):
-        """Switch to offboard mode"""
+        """Switch to offboard mode. Returns true when complete"""
         if not self.is_offboard_mode():
             self.publish_vehicle_command(
                 VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 
                 param1=1.0,  # Custom mode enabled
                 param2=6.0   # Offboard mode
             )
-            self.get_logger().info("Offboard mode command sent")
+            self.get_logger().info("Offboard set mode cmt sent")
 
-    def set_mission_mode(self):
-        """Switch to mission mode"""
+        return self.is_offboard_mode()
+
+    def set_mission_mode(self) -> bool:
+        """Switch to mission mode. Returns true when complete"""
         if not self.is_mission_mode():
             self.publish_vehicle_command(
                 VehicleCommand.VEHICLE_CMD_DO_SET_MODE,
@@ -517,25 +538,33 @@ class PX4Interface(Node, ABC):
                 param2=4.0,  # Auto mode
                 param3=4.0   # Mission submode
             )
-            self.get_logger().info("Mission mode command sent")
+            self.get_logger().info("Mission set mode cmd sent")
 
-    def takeoff(self, altitude: float | None = None):
-        """Command takeoff to specified altitude"""
+        return self.is_mission_mode()
+
+    def takeoff(self, altitude: float | None = None) -> bool:
+        """Command takeoff to specified altitude, returns True when done"""
 
         # If altitude is nan, it is set to MIS_TAKEOFF_ALT parameter in PX4
+        if self.is_takeoff_mode():
+            return False
+
         if altitude is not None:
             self.publish_vehicle_command(
-                VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param7=altitude
+                VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param7=float(altitude)
             )
             self.get_logger().info(f"Takeoff command sent (alt={altitude})")
         else:
             self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF)
             self.get_logger().info(f"Takeoff command sent (no altitude given)")
 
+        return self.is_hold_mode()
+
 
     def land(self):
         """Command landing"""
-        self.publish_vehicle_command(
-            VehicleCommand.VEHICLE_CMD_NAV_LAND
-        )
-        self.get_logger().info("Land command sent")
+        if not self.is_landing_mode():
+            self.publish_vehicle_command(
+                VehicleCommand.VEHICLE_CMD_NAV_LAND
+            )
+            self.get_logger().info("Land command sent")

@@ -5,18 +5,25 @@ from .core.mission_controller import MissionController
 
 
 class SurveyState(Enum):
-    INIT = auto()
-    ARM = auto()
-    OFFBOARD = auto()
-    TAKEOFF = auto()
-    GO_NORTH = auto()
-    LAND = auto()
-    COMPLETE = auto()
+    INIT = "INIT"
+    ARM = "ARM"
+    OFFBOARD = "OFFBOARD"
+    TAKEOFF = "TAKEOFF"
+    GO_NORTH = "GO_NORTH"
+    LAND = "LAND"
+    COMPLETE = "COMPLETE"
 
 
 class SimpleSurvey(MissionController):
     """Simple survey pattern mission"""
     
+    def __init__(self, node_name: str) -> None:
+        super().__init__(node_name, 
+                         1.0, 0.5, 
+                         0.15,
+                         5.0, 2.0)
+
+
     def define_states(self) -> type[Enum]:
         return SurveyState
     
@@ -47,24 +54,24 @@ class SimpleSurvey(MissionController):
             self.arm()
             return
         else:
-            self.transition_to(SurveyState.OFFBOARD)
+            self.transition_to(SurveyState.TAKEOFF)
 
     def handle_goto_offboard(self) -> None:
         if not self.is_offboard_mode():
             self.set_offboard_mode()
             return
         else:
-            self.transition_to(SurveyState.TAKEOFF)
+            self.transition_to(SurveyState.GO_NORTH)
     
     def handle_takeoff(self) -> None:
         """Ascend to altitude"""
 
-        if self.goto_altitude(10, self.yaw):
-            self.transition_to(SurveyState.LAND)
+        if self.takeoff(10.0):
+            self.transition_to(SurveyState.OFFBOARD)
 
     def handle_go_north(self) -> None:
         """Go North"""
-        if self.goto_position_rel(np.array([5,0,0]), self.yaw):
+        if self.goto_position_rel(np.array([10,0,0]), self.yaw):
             self.transition_to(SurveyState.LAND)
     
     def handle_land(self) -> None:
