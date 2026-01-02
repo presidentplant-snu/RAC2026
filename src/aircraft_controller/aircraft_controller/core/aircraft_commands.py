@@ -56,7 +56,7 @@ class AircraftCommands(PX4Interface):
         target_yaw: float | None = None
     ) -> bool:
         """
-            Sends a trajectory setpoint to position relative to position when first called.
+            Sends a trajectory setpoint to position relative to position when first called. (NED)
             returns True if aircraft is at said position.
         """
 
