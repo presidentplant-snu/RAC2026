@@ -69,6 +69,9 @@ RUN << EOF
 	rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 EOF
 
+# make logs appear immediately
+ENV PYTHONUNBUFFERED=1
+
 # Setup entrypoint
 WORKDIR /app/
 COPY ./entrypoint.sh  /usr/local/bin/entrypoint.sh
