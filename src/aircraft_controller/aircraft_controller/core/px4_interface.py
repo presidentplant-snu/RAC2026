@@ -24,10 +24,15 @@ from px4_msgs.msg import (
 
 # PX4 Messages - Publications
 from px4_msgs.msg import (
-    VehicleCommand,
     OffboardControlMode,
     TrajectorySetpoint,
     IrlockReport
+)
+
+from px4_msgs.msg import VehicleCommand as VehicleCommandMsg
+# PX4 Vehicle Command Service 
+from px4_msgs.srv import (
+        VehicleCommand
 )
 
 # TODO: helper function for MAV_CMD_DO_SET_ACTUATOR 
@@ -47,6 +52,7 @@ class PX4Interface(Node, ABC):
         # Subscriber and Publisher 
         self._create_subscribers()
         self._create_publishers()
+        self._create_clients()
 
         self._setup_timers(0.01)
 
@@ -186,9 +192,6 @@ class PX4Interface(Node, ABC):
 
     def _create_publishers(self):
         """Create all PX4 message publishers"""
-        self._vehicle_command_publisher = self.create_publisher(
-            VehicleCommand, "/fmu/in/vehicle_command", self.qos_profile
-        )
 
         self._offboard_control_mode_publisher = self.create_publisher(
             OffboardControlMode, "/fmu/in/offboard_control_mode", self.qos_profile
@@ -201,6 +204,15 @@ class PX4Interface(Node, ABC):
         self._irlock_report_publisher = self.create_publisher(
             IrlockReport, "/fmu/in/irlock_report", self.qos_profile
         )
+
+    def _create_clients(self):
+        """Create all PX4 Service clients (only vehicle_command for now)"""
+
+        self._vehicle_command_client = self.create_client(VehicleCommand, "/fmu/vehicle_command")
+        while not self._vehicle_command_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Vehicle Command service not available, waiting...')
+
+        self.get_logger().info('Clients created')
 
     def _setup_timers(self, timer_period:float = 0.01):
         """Setup ROS2 timers"""
@@ -371,23 +383,52 @@ class PX4Interface(Node, ABC):
             target_system: Target system ID (default: 1)
             target_component: Target component ID (default: 1)
         """
-        msg = VehicleCommand()
-        msg.command = int(command)
-        msg.param1 = float(param1)
-        msg.param2 = float(param2)
-        msg.param3 = float(param3)
-        msg.param4 = float(param4)
-        msg.param5 = float(param5)
-        msg.param6 = float(param6)
-        msg.param7 = float(param7)
+        msg = VehicleCommand.Request()
 
-        msg.target_system = target_system
-        msg.target_component = target_component
-        msg.source_system = 1
-        msg.source_component = 1
-        msg.from_external = True
-        msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
-        self._vehicle_command_publisher.publish(msg)
+        msg.request.command = int(command)
+        msg.request.param1 = float(param1)
+        msg.request.param2 = float(param2)
+        msg.request.param3 = float(param3)
+        msg.request.param4 = float(param4)
+        msg.request.param5 = float(param5)
+        msg.request.param6 = float(param6)
+        msg.request.param7 = float(param7)
+
+        msg.request.target_system = target_system
+        msg.request.target_component = target_component
+        msg.request.source_system = 1
+        msg.request.source_component = 1
+        msg.request.from_external = True
+        msg.request.timestamp = int(self.get_clock().now().nanoseconds / 1000)
+        
+        future = self._vehicle_command_client.call_async(msg)
+        
+        future.add_done_callback(self._vehicle_command_response_callback)
+        
+
+    def _vehicle_command_response_callback(self, future):
+        """Callback to handle vehicle command service response"""
+        try:
+            response = future.result().reply
+            
+            # Check result codes
+            # 0 = ACCEPTED, 1 = TEMPORARILY_REJECTED, 2 = DENIED, 
+            # 3 = UNSUPPORTED, 4 = FAILED, 5 = IN_PROGRESS
+            if response.result == 0:
+                self.get_logger().debug(f"Command accepted")
+            elif response.result == 1 or response.result == 5:
+                self.get_logger().debug(
+                    f"Command temporarily rejected or in progress: "
+                    f"result={response.result}, param1={response.result_param1}"
+                )
+            else:
+                self.get_logger().warn(
+                    f"Command not executed: "
+                    f"result={response.result}, param1={response.result_param1}"
+                )
+        except Exception as e:
+            self.get_logger().error(f"Service call failed: {e}")
+
 
     def publish_offboard_control_mode(
             self,
@@ -467,13 +508,13 @@ class PX4Interface(Node, ABC):
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self._trajectory_setpoint_publisher.publish(msg)       
     
-        def publish_irlock_report(self, pos_x: float, pos_y: float):
-            msg = IrlockReport()
+    def publish_irlock_report(self, pos_x: float, pos_y: float):
+        msg = IrlockReport()
 
-            msg.pos_x = pos_x
-            msg.pos_y = pos_y
+        msg.pos_x = pos_x
+        msg.pos_y = pos_y
 
-            self._irlock_report_publisher.publish(msg)
+        self._irlock_report_publisher.publish(msg)
 
     # =======================================
     # Vehicle State Helper Functions (can be added on a per-use basis)
@@ -534,7 +575,7 @@ class PX4Interface(Node, ABC):
             return True
 
         self.publish_vehicle_command(
-            VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=1.0
+            VehicleCommandMsg.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=1.0
         )
         self.get_logger().info("Arm command sent")
 
@@ -547,7 +588,7 @@ class PX4Interface(Node, ABC):
             return True
 
         self.publish_vehicle_command(
-            VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=0.0
+            VehicleCommandMsg.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=0.0
         )
         self.get_logger().info("Disarm command sent")
 
@@ -557,7 +598,7 @@ class PX4Interface(Node, ABC):
         """Switch to offboard mode. Returns true when complete"""
         if not self.is_offboard_mode():
             self.publish_vehicle_command(
-                VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 
+                VehicleCommandMsg.VEHICLE_CMD_DO_SET_MODE, 
                 param1=1.0,  # Custom mode enabled
                 param2=6.0   # Offboard mode
             )
@@ -569,7 +610,7 @@ class PX4Interface(Node, ABC):
         """Switch to mission mode. Returns true when complete"""
         if not self.is_mission_mode():
             self.publish_vehicle_command(
-                VehicleCommand.VEHICLE_CMD_DO_SET_MODE,
+                VehicleCommandMsg.VEHICLE_CMD_DO_SET_MODE,
                 param1=1.0,  # Custom mode enabled
                 param2=4.0,  # Auto mode
                 param3=4.0   # Mission submode
@@ -587,11 +628,11 @@ class PX4Interface(Node, ABC):
 
         if altitude is not None:
             self.publish_vehicle_command(
-                VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param7=float(altitude)
+                VehicleCommandMsg.VEHICLE_CMD_NAV_TAKEOFF, param7=float(altitude)
             )
             self.get_logger().info(f"Takeoff command sent (alt={altitude})")
         else:
-            self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF)
+            self.publish_vehicle_command(VehicleCommandMsg.VEHICLE_CMD_NAV_TAKEOFF)
             self.get_logger().info(f"Takeoff command sent (no altitude given)")
 
         return self.is_hold_mode()
@@ -601,6 +642,6 @@ class PX4Interface(Node, ABC):
         """Command landing"""
         if not self.is_landing_mode():
             self.publish_vehicle_command(
-                VehicleCommand.VEHICLE_CMD_NAV_LAND
+                VehicleCommandMsg.VEHICLE_CMD_NAV_LAND
             )
             self.get_logger().info("Land command sent")
