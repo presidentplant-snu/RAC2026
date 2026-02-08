@@ -1,0 +1,437 @@
+root@HT-HD01-D478:~# iw dev wlan0.sta1 station dump 
+Station 78:72:64:ef:d2:be (on wlan0.sta1)
+	inactive time:	5430 ms
+	rx bytes:	2114233
+	rx packets:	2708
+	tx bytes:	348893
+	tx packets:	2322
+	tx retries:	69
+	tx failed:	0
+	rx drop misc:	2
+	signal:  	-12 dBm
+	signal avg:	-15 dBm
+	tx bitrate:	325.0 MBit/s VHT-MCS 7 80MHz short GI VHT-NSS 1
+	tx duration:	0 us
+	rx bitrate:	13.5 MBit/s VHT-MCS 0 40MHz VHT-NSS 1
+	rx duration:	0 us
+	expected throughput:	14.648Mbps
+	authorized:	yes
+	authenticated:	yes
+	associated:	yes
+	preamble:	long
+	WMM/WME:	yes
+	MFP:		yes
+	TDLS peer:	no
+	DTIM period:	0
+	beacon interval:0
+	connected time:	1500 seconds
+	associated at [boottime]:	144.777s
+	associated at:	1766234451985 ms
+	current time:	1766235952131 ms
+root@HT-HD01-D478:~# morse_cli stats
+System uptime (us): 1669680228
+retry table: 
+Retry	Count	Avg Time
+=====	=====	========
+0	14037	10424
+1	44	4559
+2	7	6789
+3	0	0
+4	1	13300
+5	0	0
+6	0	0
+7	1	5435
+8	0	0
+9	0	0
+10	0	0
+11	0	0
+12	33	292
+commands received: 1655
+commands responded: 1655
+commands repeated: 0
+commands failed: 0
+commands response failed: 0
+commands pending: 0
+commands late: 0
+last host ID: 29216
+total_fh_page_irq: 15778
+total_fh_pages: 15778
+total_th_page_irq: 15072
+total_th_pages: 16195
+Aon clk long calibration: 0
+Aon clk frequency: 0
+Aon sleep duration adjusted for clock tolerance: 0
+number of PS_sleep: 0
+woke from PS (timer): 0
+woke from PS (pin): 0
+Pager from_host reaped: 15590
+Pager to_host reaped: 0
+to_host pages dropped (host in standby): 0
+Invalid pages received: 0
+Events to host sent: 0
+Events to host failed: 0
+No page for offload response: 0
+ARP requests detected: 0
+ARP requests answered: 0
+ARP requests dropped: 0
+ARP requests let through: 0
+ARP table updated: 0
+ARP gratuitous generated: 0
+tx_status none to send: 0
+tx_status couldnt get page: 15
+tx_status dropped: 0
+tx_status buffer flushed: 11908
+tx_status transmission corrupted: 0
+tx_status page reaped: 0
+Wake action frames handled: 0
+Host main task unused stack (words): 165
+Host timer task unused stack (words): 56
+RTOS heap free bytes: 5112
+IPv4 Packets received: 2422
+TCP Packets received: 2421
+UDP Packets received: 0
+Whitelist Packets ignored: 0
+Whitelist Packets dropped: 0
+Whitelist Packets allowed: 0
+ICMP Packets received: 0
+ICMP requests detected: 0
+ICMP requests answered: 0
+ICMP requests dropped: 0
+DHCP Packets received: 0
+DHCP discoveries sent: 0
+DHCP requests sent: 0
+DHCP lease updates sent: 0
+DHCP leases fully expired: 0
+DHCP leases obtained: 0
+DHCP leases renewed/rebound: 0
+TCP keepalives answered: 0
+TCP keepalives to host: 0
+TCP keepalives generated: 0
+TCP keepalive connection lost: 0
+Standby wakeup frame rx: 0
+Standby status frame (standby) tx: 0
+Standby status frame (awake) tx: 0
+To mcu wake pin toggle: 0
+Standby SA Query request tx: 0
+RX corrupt dot11 action frames: 0
+BSS keep alive tx: 0
+TWT failed to flush tx status before umac pause: 0
+hwscan started: 0
+hwscan completed: 0
+hwscan aborted: 0
+hwscan no page for probe: 0
+hwscan no page to store config: 0
+hwscan no channels to scan: 0
+apps cpu utilisation (tenths of a percent): 5
+apps cpu instructions per 1000 cycles: 584
+periodic arp frames sent: 0
+pageset stats: 
+Pageset 0
+	allocated: 30
+	total: 30
+Pageset 1
+	allocated: 26
+	total: 26
+No A-MPDU candidate: 1768
+commands expired in MAC req: 0
+commands expired in MAC resp: 0
+DCF STF fired: 482
+DCF LTF fired: 0
+DCF energy detect fired: 606
+DCF aborted: 1506
+DCF granted: 13320
+DCF medium busy before tx: 1
+DCF phy blocked before tx: 0
+beacon loss: 0
+beacon changed: 0
+beacon rssi changed: 0
+aid in tim: 0
+tim contains aid, but STA awake: 0
+tim group address: 0
+tim nothing: 0
+tim populated: 0
+TSF resync requests: 0
+DTIM_sleep_stats: 0
+CTS_sleep_stats: 0
+CTS_PS frame arrived late: 0
+AGG N aggregates total: 2292
+AGG N aggregate rounds: 13254
+AGG N aggregates: 11843 1138 119 53 25 14 11 8 14 7 2 5 2 4 2 1 6 
+AGG TX rate is NULL: 0
+AGG TX param mismatch: 48
+AGG TX max txop exceeded: 0
+AGG TX length exceeded: 0
+AGG crosses tbtt: 255
+AGG crosses twt sp end: 0
+AGG crosses RAW slot: 0
+AGG crosses scheduled tx ts: 0
+RX Total: 3000
+RX Pass FCS: 2962
+RX Sig Field Err: 1041
+RX buffer unavailable: 1
+RX MAC was too slow: 0
+TX Total: 13300
+TX Revoked: 1728
+TX non-contending NDP revoked: 0
+TX Lifetime expired: 33
+TX returned to UMAC due to power save: 0
+TX flushed: 0
+TX Malformed frame: 0
+TX QoS NULL: 0
+TX ACK Valid: 1412
+TX ACK Timeout: 58
+TX CTS Timeout: 0
+Longest delayed TX ACK (in uS):3
+TX ACK already finished: 0
+TX ACK Invalid (FCS): 0
+TX ACK Invalid (scrambler): 0
+TX ACK lost: 1
+TX CTS lost: 0
+TX fragment: 0
+TX BlockAck: 285
+RX BlockAck: 274
+TX NDP ACK: 1262
+TX round-trip success %: 96
+TX requests: 14806
+TX avg backoff slots: 1
+TX Encryptable pkts: 2282
+TX ReEncryptable pkts: 2028
+TX Unencryptable pkts: 0
+RX transaction(s) dropped: 11
+RX packet(s) dropped: 0
+RX Decryptable pkts: 2427
+RX Undecryptable pkts: 0
+RX MPDU delimiters Invalid: 243
+RX MPDU delimiters: 1605
+BEACONS RX: 0
+BEACONS TX: 11809
+BEACONS TX delayed: 0
+BEACONS missing from host: 0
+BEACONS late from host delay (avg uS): 19131
+BEACONS tx lifetime expired: 33
+BEACONS late from host max delay (usec): 72950
+BEACONS late from host count (no. of packets): 83
+BEACONS Tx failed count: 0
+TX NDP Probe Req: 0
+RX NDP Probe Req: 1
+TX RTS/CTS max attempts reached: 0
+TX RTS: 21
+TX CTS: 350
+RX RTS: 330
+RX CTS: 21
+RX CTS for RTS: 21
+RX CTS Invalid (orphaned): 0
+TX RTS/CTS success: 100
+RX no key found in key inspection: 0
+MPE IRQ count: 21122
+RX transaction(s) total: 1911
+RX NDP total: 1448
+RX NDP not for us: 15
+RX A-MPDU/S-MPDU: 510
+RX Non-A-MPDU/Non-S-MPDU: 1401
+Total RX MPDUs found by MPE: 0
+Total RX empty delims: 2026
+RX no valid first frame: 0
+RX MPDUs with FCS fail: 38
+RX MPDUs with MIC fail: 0
+RX MPDUs with unknown MAC header: 0
+RX PV1 MPDUs: 0
+RX transactions without any response: 34
+RX MPDUs not for us: 0
+RX AMPDU bitmap: 285 279 161 115 92 76 66 60 51 41 38 31 24 20 17 14 
+RX Multicast Packets Received: 0
+RX Multicast Packets Filtered: 0
+RAW: 
+RAW Assignments
+	Valid: 0 0 0 0 0 0 0 0
+	Truncated by tbtt: 0
+	Invalid: 0
+	Already past: 0
+Delayed due to RAW
+	From aci queue: 0
+	From bc/mc queue: 0
+	From abs time queue: 0
+	Frame crosses slot: 0
+CALIB: 
+Manged Calibration
+	Quiet calibration granted: 20
+	Quiet calibration rejected: 2
+	Quiet calibration cancelled: 0
+	Non-Quiet calibration granted: 0
+	Calibration complete: 20
+Duty Cycle: 
+Duty Cycle Target (%): 100.00
+Duty Cycle TX On (us): 0
+Duty Cycle TX Off (Blocked) (us): 0
+Duty Cycle Max toff (us): 0
+Duty Cycle Early Frames: 0
+Duty Cycle illegal transmission: 0
+Duty Cycle traffic dropped (NDP): 0
+Duty Cycle traffic dropped: 0
+WUP QosNull not acked: 0
+QosNull resent: 0
+QosNull queued behind another: 0
+QosNull tx backing off: 0
+MAC State: 
+
+    RX state                                :0
+    TX state                                :0
+    Channel config                          :0
+    Managed calibration state               :0
+    Powersave enabled                       :0
+    Dynamic powersave offload enabled       :0
+    STA PS state                            :0
+    Is waiting on dynamic powersave timeout :0
+    TX blocked by host cmd                  :0
+    Is waiting for medium sync              :0
+    N packets in QoS queues                 :0
+Stale AID removed: 0
+MAC main task unused stack (words): 292
+MAC timer task unused stack (words): 61
+TWT sta num sp entered: 0
+TWT sta enters sp too early: 0
+TWT sta missed sp (already over): 0
+TWT sta missed start of sp (already started): 0
+TWT sta sp already active on ps wake: 0
+TWT announcement delay from sp start (avg us): 0
+TWT operation halted: 0
+TWT operation resumed: 0
+TSF for sta has been (re)set: 0
+Standby exit from wakeup frame: 0
+Standby exit for association: 0
+Standby exit from userspace: 0
+Standby exit for valid SSID in probe: 0
+Standby SA Query response rx: 0
+Standby SA Query response timeouts: 0
+Standby deep sleep enter: 0
+Standby deep sleep exit (assoc): 0
+Standby deep sleep exit (bss moved): 0
+Standby deep sleep exit (no assoc): 0
+Vendor IEs matching OUI filter: 0
+PS scheduled after beacon miss: 0
+PS scheduled after pin wake: 0
+PS scheduled after TIM set with no traffic: 0
+PS max traffic delivery delay after TIM set (us): 0
+mac cpu utilisation (tenths of a percent): 5
+mac cpu instructions per 1000 cycles: 572
+Standby exit from external input: 0
+Standby exit from whitelisted packet: 0
+Standby exit TCP connection lost: 0
+Temperature(Celcius):51
+Vbat(mV): 3327
+PMU Switched to Vbat setting (mV): 0
+RC-CAL Freq in Hz: 0
+Vbuck Trim: 5
+Current RF frequency Hz: 0
+Current Operating BW MHz: 0
+Current Primary Channel BW MHz: 0
+DCF medium went busy after go: 0
+DCF medium went busy during start: 3
+DCF time in past: 0
+MPE RX overflow: 0
+MPE RX underflow: 0
+RX detected less than guard IFS: 0
+TX Scrambler Init Value: 127
+RX Scrambler Decoded Byte: 7
+Signal Field Error: 1041
+Packet Detect Fired STF: 4408
+Packet Detect Fired LTF: 3593
+Packet Detect Timestamp (us): 1662869701
+Non-NDP PSDU Rx: 1911
+Coarse Frequency Offset:-941
+Final Frequency Offset:1514
+Frequency Offset Hz:0
+Detected Sub-Band: 0
+Corr0 Power:0
+Corr1 Power:0
+Corr2 Power:0
+Corr3 Power:0
+Corr4 Power:0
+Corr5 Power:0
+Corr6 Power:0
+Corr7 Power:0
+Corr8 Power:0
+AGC Gain: 3
+HW AGC Counter: 0
+SW AGC Counter: 0
+AGC Gain STF: 0
+AGC Source: 0
+AGC false trigger: 0
+AGC LNA Status: 1
+AGC FEM Rx Gain: 1
+AGC LNA Bypass: 0
+AGC Interference Detected:0
+Inband Power (dB): 0
+Received Power (dBm):-97
+Detected Channel BW:0
+STF Status:0
+Noise dBm:-92
+Detected RX Mode:0
+Oper BW Indicator: 0
+Corr2S Energy:0
+Corr4S Energy:0
+Noise Metric 2: 0
+Signal Metric 2: 0
+Range Select: 0
+TX Abort(s): 0
+TX Stale(s): 611
+TX Underflow(s): 0
+RX Filtered: 0
+DGC Energy Meter Pwr dB:0
+DGC Inband Pwr dB:0
+DGC Diff Pwr dB:0
+DGC BackOff Pwr dB:0
+DGC CoffFactor Pwr dB:0
+DGC Multiplier:0
+DGC Shift:0
+TX Traveling Pilots:1671
+Max Stack Used: 1304
+min_neset: 167
+NB INTRF Detected:1
+NB INTRF Index:48
+NB INTRF Num:326
+NB INTRF Power dBm:-92
+NB INTRF SIR dB:-4
+Jammer Detected and Handled:0
+FSG tx rounds: 0
+DC locked state I:0
+DC locked state Q:0
+LTF Corr Power: 0
+STF number of peaks: 0
+Avg ring osc freq mhz: 0
+ring osc0 count: 0
+ring osc1 count: 0
+ring osc2 count: 0
+ring osc3 count: 0
+ring osc4 count: 0
+Tx subband centre frequency Hz: 0
+Tx subband operating BW MHz: 0
+Tx subband primary channel BW MHz: 0
+Tx subband primary index: 0
+Tx subband channel changed count: 0
+Total data packets sent in subband: 0
+SIG_FIELD_FAIL BAD STF: 7
+SIG_FIELD_FAIL BAD LTF: 807
+SIG_FIELD_FAIL CRC Error: 234
+Servo Gain: 0
+I trim: 0
+Q trim: 0
+Energy Meter Reading: 0
+Energy Meter threshold: 670
+RSSI counter 3: 0
+DC auto lock fired: 0
+PHYSM watchdog fired: 0
+PHYSM DCF status: 0x0
+PHYSM TX Active Abort: 0x0
+PHYSM TX Pend Abort: 0x0
+Packet boundary index:0
+PHYPSM PHY IRQ status zero count: 0
+phy cpu utilisation (tenths of a percent): 992
+phy cpu instructions per 1000 cycles: 385
+
+root@HT-HD01-D478:~# morse_cli stats -aj
+{"System uptime (us)": 2065177783,"retry table": [{"Retry": 0,"Count": 18148,"Avg Time": 10637},{"Retry": 1,"Count": 45,"Avg Time": 4525},{"Retry": 2,"Count": 7,"Avg Time": 6789},{"Retry": 3,"Count": 0,"Avg Time": 0},{"Retry": 4,"Count": 1,"Avg Time": 13300},{"Retry": 5,"Count": 0,"Avg Time": 0},{"Retry": 6,"Count": 0,"Avg Time": 0},{"Retry": 7,"Count": 1,"Avg Time": 5435},{"Retry": 8,"Count": 0,"Avg Time": 0},{"Retry": 9,"Count": 0,"Avg Time": 0},{"Retry": 10,"Count": 0,"Avg Time": 0},{"Retry": 11,"Count": 0,"Avg Time": 0},{"Retry": 12,"Count": 33,"Avg Time": 292}],"commands received": 1818,"commands responded": 1818,"commands repeated": 0,"commands failed": 0,"commands response failed": 0,"commands pending": 0,"commands late": 0,"last host ID": 31824,"total_fh_page_irq": 20053,"total_fh_pages": 20053,"total_th_page_irq": 19800,"total_th_pages": 20938,"Aon clk long calibration": 0,"Aon clk frequency": 0,"Aon sleep duration adjusted for clock tolerance": 0,"number of PS_sleep": 0,"woke from PS (timer)": 0,"woke from PS (pin)": 0,"Pager from_host reaped": 20718,"Pager to_host reaped": 0,"to_host pages dropped (host in standby)": 0,"Invalid pages received": 0,"Events to host sent": 0,"Events to host failed": 0,"No page for offload response": 0,"ARP requests detected": 0,"ARP requests answered": 0,"ARP requests dropped": 0,"ARP requests let through": 0,"ARP table updated": 0,"ARP gratuitous generated": 0,"tx_status none to send": 0,"tx_status couldnt get page": 15,"tx_status dropped": 0,"tx_status buffer flushed": 15771,"tx_status transmission corrupted": 0,"tx_status page reaped": 0,"Wake action frames handled": 0,"Host main task unused stack (words)": 165,"Host timer task unused stack (words)": 56,"RTOS heap free bytes": 5112,"IPv4 Packets received": 2653,"TCP Packets received": 2421,"UDP Packets received": 0,"Whitelist Packets ignored": 0,"Whitelist Packets dropped": 0,"Whitelist Packets allowed": 0,"ICMP Packets received": 231,"ICMP requests detected": 0,"ICMP requests answered": 0,"ICMP requests dropped": 0,"DHCP Packets received": 0,"DHCP discoveries sent": 0,"DHCP requests sent": 0,"DHCP lease updates sent": 0,"DHCP leases fully expired": 0,"DHCP leases obtained": 0,"DHCP leases renewed/rebound": 0,"TCP keepalives answered": 0,"TCP keepalives to host": 0,"TCP keepalives generated": 0,"TCP keepalive connection lost": 0,"Standby wakeup frame rx": 0,"Standby status frame (standby) tx": 0,"Standby status frame (awake) tx": 0,"To mcu wake pin toggle": 0,"Standby SA Query request tx": 0,"RX corrupt dot11 action frames": 0,"BSS keep alive tx": 0,"TWT failed to flush tx status before umac pause": 0,"hwscan started": 0,"hwscan completed": 0,"hwscan aborted": 0,"hwscan no page for probe": 0,"hwscan no page to store config": 0,"hwscan no channels to scan": 0,"apps cpu utilisation (tenths of a percent)": 5,"apps cpu instructions per 1000 cycles": 584,"periodic arp frames sent": 0,"pageset stats": [{"Pageset": 0,"allocated": 30,"total": 30},{"Pageset": 1,"allocated": 26,"total": 26}]}
+root@HT-HD01-D478:~# morse_cli stats -mj
+{"No A-MPDU candidate": 2027,"commands expired in MAC req": 0,"commands expired in MAC resp": 0,"DCF STF fired": 613,"DCF LTF fired": 0,"DCF energy detect fired": 616,"DCF aborted": 1691,"DCF granted": 17462,"DCF medium busy before tx": 1,"DCF phy blocked before tx": 0,"beacon loss": 0,"beacon changed": 0,"beacon rssi changed": 0,"aid in tim": 0,"tim contains aid, but STA awake": 0,"tim group address": 0,"tim nothing": 0,"tim populated": 0,"TSF resync requests": 0,"DTIM_sleep_stats": 0,"CTS_sleep_stats": 0,"CTS_PS frame arrived late": 0,"AGG N aggregates total": 2544,"AGG N aggregate rounds": 17388,"AGG N aggregates": "15725 1390 119 53 25 14 11 8 14 7 2 5 2 4 2 1 6 ","AGG TX rate is NULL": 0,"AGG TX param mismatch": 48,"AGG TX max txop exceeded": 0,"AGG TX length exceeded": 0,"AGG crosses tbtt": 255,"AGG crosses twt sp end": 0,"AGG crosses RAW slot": 0,"AGG crosses scheduled tx ts": 0,"RX Total": 3726,"RX Pass FCS": 3687,"RX Sig Field Err": 1447,"RX buffer unavailable": 1,"RX MAC was too slow": 0,"TX Total": 17435,"TX Revoked": 1916,"TX non-contending NDP revoked": 0,"TX Lifetime expired": 33,"TX returned to UMAC due to power save": 0,"TX flushed": 0,"TX Malformed frame": 0,"TX QoS NULL": 0,"TX ACK Valid": 1664,"TX ACK Timeout": 59,"TX CTS Timeout": 0,"Longest delayed TX ACK (in uS)": 3,"TX ACK already finished": 0,"TX ACK Invalid (FCS)": 0,"TX ACK Invalid (scrambler)": 0,"TX ACK lost": 1,"TX CTS lost": 0,"TX fragment": 0,"TX BlockAck": 285,"RX BlockAck": 275,"TX NDP ACK": 1987,"TX round-trip success %": 96,"TX requests": 19126,"TX avg backoff slots": 1,"TX Encryptable pkts": 2534,"TX ReEncryptable pkts": 2035,"TX Unencryptable pkts": 0,"RX transaction(s) dropped": 11,"RX packet(s) dropped": 0,"RX Decryptable pkts": 2676,"RX Undecryptable pkts": 0,"RX MPDU delimiters Invalid": 243,"RX MPDU delimiters": 1605,"BEACONS RX": 0,"BEACONS TX": 15691,"BEACONS TX delayed": 0,"BEACONS missing from host": 0,"BEACONS late from host delay (avg uS)": 19131,"BEACONS tx lifetime expired": 33,"BEACONS late from host max delay (usec)": 72950,"BEACONS late from host count (no. of packets)": 83,"BEACONS Tx failed count": 0,"TX NDP Probe Req": 0,"RX NDP Probe Req": 1,"TX RTS/CTS max attempts reached": 0,"TX RTS": 21,"TX CTS": 357,"RX RTS": 330,"RX CTS": 21,"RX CTS for RTS": 21,"RX CTS Invalid (orphaned)": 0,"TX RTS/CTS success": 100,"RX no key found in key inspection": 0,"MPE IRQ count": 26709,"RX transaction(s) total": 2637,"RX NDP total": 1705,"RX NDP not for us": 20,"RX A-MPDU/S-MPDU": 510,"RX Non-A-MPDU/Non-S-MPDU": 2127,"Total RX MPDUs found by MPE": 0,"Total RX empty delims": 2026,"RX no valid first frame": 0,"RX MPDUs with FCS fail": 39,"RX MPDUs with MIC fail": 0,"RX MPDUs with unknown MAC header": 0,"RX PV1 MPDUs": 0,"RX transactions without any response": 35,"RX MPDUs not for us": 0,"RX AMPDU bitmap": "285 279 161 115 92 76 66 60 51 41 38 31 24 20 17 14 ","RX Multicast Packets Received": 0,"RX Multicast Packets Filtered": 0,"RAW": {"RAW Assignments": {"Valid": " 0 0 0 0 0 0 0 0","Truncated by tbtt": 0,"Invalid": 0,"Already past": 0},"Delayed due to RAW": {"From aci queue": 0,"From bc/mc queue": 0,"From abs time queue": 0,"Frame crosses slot": 0}},"CALIB": {"Manged Calibration": {"Quiet calibration granted": 27,"Quiet calibration rejected": 2,"Quiet calibration cancelled": 0,"Non-Quiet calibration granted": 0,"Calibration complete": 27}},"Duty Cycle": {"Duty Cycle Target (%)": 100.00,"Duty Cycle TX On (us)": 0,"Duty Cycle TX Off (Blocked) (us)": 0,"Duty Cycle Max toff (us)": 0,"Duty Cycle Early Frames": 0},"Duty Cycle illegal transmission": 0,"Duty Cycle traffic dropped (NDP)": 0,"Duty Cycle traffic dropped": 0,"WUP QosNull not acked": 0,"QosNull resent": 0,"QosNull queued behind another": 0,"QosNull tx backing off": 0,"MAC State": {"RX state": 0,"TX state": 0,"Channel config": 0,"Managed calibration state": 0,"Powersave enabled": 0,"Dynamic powersave offload enabled": 0,"STA PS state": 0,"Is waiting on dynamic powersave timeout": 0,"TX blocked by host cmd": 0,"Is waiting for medium sync": 0,"N packets in QoS queues": 0},"Stale AID removed": 0,"MAC main task unused stack (words)": 292,"MAC timer task unused stack (words)": 61,"TWT sta num sp entered": 0,"TWT sta enters sp too early": 0,"TWT sta missed sp (already over)": 0,"TWT sta missed start of sp (already started)": 0,"TWT sta sp already active on ps wake": 0,"TWT announcement delay from sp start (avg us)": 0,"TWT operation halted": 0,"TWT operation resumed": 0,"TSF for sta has been (re)set": 0,"Standby exit from wakeup frame": 0,"Standby exit for association": 0,"Standby exit from userspace": 0,"Standby exit for valid SSID in probe": 0,"Standby SA Query response rx": 0,"Standby SA Query response timeouts": 0,"Standby deep sleep enter": 0,"Standby deep sleep exit (assoc)": 0,"Standby deep sleep exit (bss moved)": 0,"Standby deep sleep exit (no assoc)": 0,"Vendor IEs matching OUI filter": 0,"PS scheduled after beacon miss": 0,"PS scheduled after pin wake": 0,"PS scheduled after TIM set with no traffic": 0,"PS max traffic delivery delay after TIM set (us)": 0,"mac cpu utilisation (tenths of a percent)": 5,"mac cpu instructions per 1000 cycles": 572,"Standby exit from external input": 0,"Standby exit from whitelisted packet": 0,"Standby exit TCP connection lost": 0}
+root@HT-HD01-D478:~# morse_cli stats -uj
+{"Temperature(Celcius)": 51,"Vbat(mV)": 3327,"PMU Switched to Vbat setting (mV)": 0,"RC-CAL Freq in Hz": 0,"Vbuck Trim": 5,"Current RF frequency Hz": 0,"Current Operating BW MHz": 0,"Current Primary Channel BW MHz": 0,"DCF medium went busy after go": 0,"DCF medium went busy during start": 3,"DCF time in past": 0,"MPE RX overflow": 0,"MPE RX underflow": 0,"RX detected less than guard IFS": 0,"TX Scrambler Init Value": 121,"RX Scrambler Decoded Byte": 41,"Signal Field Error": 1448,"Packet Detect Fired STF": 5808,"Packet Detect Fired LTF": 4671,"Packet Detect Timestamp (us)": 2069264468,"Non-NDP PSDU Rx": 2643,"Coarse Frequency Offset": 89,"Final Frequency Offset": -22,"Frequency Offset Hz": 0,"Detected Sub-Band": 0,"Corr0 Power": 0,"Corr1 Power": 0,"Corr2 Power": 0,"Corr3 Power": 0,"Corr4 Power": 0,"Corr5 Power": 0,"Corr6 Power": 0,"Corr7 Power": 0,"Corr8 Power": 0,"AGC Gain": 3,"HW AGC Counter": 0,"SW AGC Counter": 0,"AGC Gain STF": 0,"AGC Source": 0,"AGC false trigger": 0,"AGC LNA Status": 1,"AGC FEM Rx Gain": 1,"AGC LNA Bypass": 0,"AGC Interference Detected": 0,"Inband Power (dB)": 0,"Received Power (dBm)": 0,"Detected Channel BW": 0,"STF Status": 0,"Noise dBm": -88,"Detected RX Mode": 0,"Oper BW Indicator": 0,"Corr2S Energy": 0,"Corr4S Energy": 0,"Noise Metric 2": 0,"Signal Metric 2": 0,"Range Select": 0,"TX Abort(s)": 0,"TX Stale(s)": 657,"TX Underflow(s)": 0,"RX Filtered": 0,"DGC Energy Meter Pwr dB": 0,"DGC Inband Pwr dB": 0,"DGC Diff Pwr dB": 0,"DGC BackOff Pwr dB": 0,"DGC CoffFactor Pwr dB": 0,"DGC Multiplier": 0,"DGC Shift": 0,"TX Traveling Pilots": 1928,"Max Stack Used": 1304,"min_neset": 284,"NB INTRF Detected": 0,"NB INTRF Index": 0,"NB INTRF Num": 457,"NB INTRF Power dBm": -120,"NB INTRF SIR dB": 88,"Jammer Detected and Handled": 0,"FSG tx rounds": 0,"DC locked state I": 0,"DC locked state Q": 0,"LTF Corr Power": 0,"STF number of peaks": 0,"Avg ring osc freq mhz": 0,"ring osc0 count": 0,"ring osc1 count": 0,"ring osc2 count": 0,"ring osc3 count": 0,"ring osc4 count": 0,"Tx subband centre frequency Hz": 0,"Tx subband operating BW MHz": 0,"Tx subband primary channel BW MHz": 0,"Tx subband primary index": 0,"Tx subband channel changed count": 0,"Total data packets sent in subband": 0,"SIG_FIELD_FAIL BAD STF": 9,"SIG_FIELD_FAIL BAD LTF": 1127,"SIG_FIELD_FAIL CRC Error": 321,"Servo Gain": 0,"I trim": 0,"Q trim": 0,"Energy Meter Reading": 0,"Energy Meter threshold": 1137,"RSSI counter 3": 0,"DC auto lock fired": 0,"PHYSM watchdog fired": 0,"PHYSM DCF status": 0,"PHYSM TX Active Abort": 0,"PHYSM TX Pend Abort": 0,"Packet boundary index": 0,"PHYPSM PHY IRQ status zero count": 0,"phy cpu utilisation (tenths of a percent)": 993,"phy cpu instructions per 1000 cycles": 384}
