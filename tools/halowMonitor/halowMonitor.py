@@ -217,8 +217,8 @@ class MorseMonitor:
             snr = signal - noise if signal and noise else 0
             
             # Color code signal strength
-            signal_color = Colors.GREEN if signal > -50 else (Colors.YELLOW if signal > -70 else Colors.RED)
-            snr_color = Colors.GREEN if snr > 40 else (Colors.YELLOW if snr > 20 else Colors.RED)
+            signal_color = Colors.GREEN if signal > -60 else (Colors.YELLOW if signal > -88 else Colors.RED)
+            snr_color = Colors.GREEN if snr > 40 else (Colors.YELLOW if snr > 10 else Colors.RED)
             
             print(f"  Signal: {signal_color}{signal} dBm{Colors.RESET} (avg: {signal_avg} dBm) | "
                   f"Noise: {noise} dBm | SNR: {snr_color}{snr} dB{Colors.RESET}")
