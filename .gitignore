@@ -4,3 +4,5 @@ install/
 __pycache__/
 
 PX4-Autopilot/
+
+flight_logs/*
