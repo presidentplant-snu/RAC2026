@@ -19,6 +19,7 @@ VisionTrackerMode::VisionTrackerMode(rclcpp::Node & node)
 
 void VisionTrackerMode::onActivate() {
 	_state = State::Init;
+	RCLCPP_INFO(_node.get_logger(), "Tracking Mode activated!");
 	// Activation Code
 }
 
@@ -33,12 +34,15 @@ void VisionTrackerMode::updateSetpoint(float dt_s)   {
 	Eigen::Vector3f target;
 	switch(_state) {
 		case State::Init:
-			if (!checkTargetTimeout() && isTargetValid){
-				_initial_heading = _vehicle_local_position->heading();
+			// check if target is valid first so we know that targetTimestamp isn't invalid.
+			if (!isTargetValid) return;
+			if (checkTargetTimeout()) return;
 
-				switchToState(State::Approach);
-			}
+			_initial_heading = _vehicle_local_position->heading();
+			switchToState(State::Approach);
+
 			break;
+
 		case State::Approach:
 			if (checkTargetTimeout()){
 				RCLCPP_ERROR(_node.get_logger(), "Target track timeout, returning to previous mode");
@@ -56,6 +60,7 @@ void VisionTrackerMode::updateSetpoint(float dt_s)   {
 				switchToState(State::Descend);
 			}
 			break;
+
 		case State::Descend:
 			// Don't check for timeout since we are already on the target, just keep descending even if target's not visible
 			// Have to edit logic depending on mission.
@@ -70,9 +75,11 @@ void VisionTrackerMode::updateSetpoint(float dt_s)   {
 				switchToState(State::Done);
 			}
 			break;
+
 		case State::Done:
 			completed(px4_ros2::Result::Success);
 			break;
+
 		default:
 			return;
 	}
@@ -122,12 +129,15 @@ void VisionTrackerMode::trackedObjectCallback(const aircraft_msgs::msg::CameraTr
 
 	// Assume target is on ground (for now). Use vehicle_pos(2) + height instead of 0 because of distance sensor.
 	_target_pos_ned << (delta_ned_xy + vehicle_pos.head<2>()), vehicle_pos(2) + height;
-	targetTimestamp = _node.now();
+	targetTimestamp = _node.get_clock()->now();
 	isTargetValid = true;
 }
 
 bool VisionTrackerMode::checkTargetTimeout(){
-	return (_node.now() - targetTimestamp).seconds() > timeoutLimit;
+	if (targetTimestamp == rclcpp::Time(0)) {
+		return true;
+	}
+	return (_node.get_clock()->now() - targetTimestamp).seconds() > timeoutLimit;
 }
 
 bool VisionTrackerMode::positionReached(const Eigen::Vector3f & target_position_m) const {

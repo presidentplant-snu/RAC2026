@@ -15,6 +15,7 @@ find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
 	"msg/AircraftState.msg"
+	"msg/CameraTrackedObject.msg"
 	DEPENDENCIES std_msgs
 )
 

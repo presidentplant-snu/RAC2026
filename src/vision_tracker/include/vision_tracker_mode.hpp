@@ -41,7 +41,7 @@ class VisionTrackerMode : public px4_ros2::ModeBase
 
 		rclcpp::Node& _node;
 		rclcpp::Subscription<aircraft_msgs::msg::CameraTrackedObject>::SharedPtr _cam_tracked_obj_sub;
-		rclcpp::Time targetTimestamp;
+		rclcpp::Time targetTimestamp{0};
 		bool isTargetValid{false};
 		Eigen::Vector3f _target_pos_ned;
 		float _initial_heading{0};
