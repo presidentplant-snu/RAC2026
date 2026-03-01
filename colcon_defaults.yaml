@@ -1,5 +1,5 @@
 build:
   packages-ignore-regex:
     - example.*
-    - px4
+    - px4$
   symlink-install: false
