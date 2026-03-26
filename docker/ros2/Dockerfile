@@ -59,11 +59,11 @@ EOF
 COPY requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --break-system-packages -r /tmp/requirements.txt
 
-# Install utils 
+# Install utils and additional libraries
 RUN << EOF
 	apt-get update
 	apt-get -y --quiet --no-install-recommends install \
-		vim
+		vim python3-gst-1.0 libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-gl
 	apt-get -y autoremove
 	apt-get clean autoclean
 	rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*

@@ -145,4 +145,8 @@ alias dds="MicroXRCEAgent udp4 -p 8888"
 BASHRC
 EOF
 
+ENV GZ_SIM_RESOURCE_PATH=/app/PX4-Autopilot/Tools/simulation/gz/worlds/:/app/PX4-Autopilot/Tools/simulation/gz/models/:/app/gz/worlds/:/app/gz/models/
+ENV GZ_SIM_SERVER_CONFIG_PATH=/app/gz/config/server.config 
+ENV GZ_SIM_SYSTEM_PLUGIN_PATH=/app/PX4-Autopilot/build/px4_sitl_default/src/modules/simulation/gz_plugins/
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "bash"]

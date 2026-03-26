@@ -1,1 +1,6 @@
 source /opt/ros/jazzy/setup.bash
+
+# Fix Gst python binding lib conflicts
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libunwind.so.8
+alias cb="colcon build --packages-ignore-regex 'example*'"
+alias ws="source /app/src/install/setup.bash"
