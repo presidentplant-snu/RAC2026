@@ -24,7 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            # TODO: Add Entrypoints
+            'vision_processor = vision_processor.vision_processor:main'
         ],
     },
 )
