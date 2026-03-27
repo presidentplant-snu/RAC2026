@@ -38,7 +38,7 @@ class VisionProcessorNode(Node):
         self.pipeline_thread.start()
 
         self.camera_w = 1920
-        self.camera_h = 1920
+        self.camera_h = 1080
         self.camera_fov_w = 80 # degrees
         self.camera_fov_h = 80*9/16 # degrees
 
@@ -52,7 +52,7 @@ class VisionProcessorNode(Node):
                 )
 
         self.tracked_object_publisher = self.create_publisher(
-                CameraTrackedObject, '/tracked_object',
+                CameraTrackedObject, '/camera_tracked_object',
                 QoSPresetProfiles.SERVICES_DEFAULT.value
                 )
 
@@ -78,12 +78,18 @@ class VisionProcessorNode(Node):
     def _main_timer_callback(self):
         self.aircraft_state = AircraftState
         self.aircraft_state.track_type = AircraftState.TRACK_ARUCO
+        start_time = 0
+        end_time = 0
+
         if self.aircraft_state is None:
             return
 
         self.frame = self.pipeline.get_frame() 
         if self.frame is None:
             return
+
+        if self.show_debug:
+            start_time = time.perf_counter()
 
         match self.aircraft_state.track_type:
             case AircraftState.TRACK_PATIENT:
@@ -92,13 +98,19 @@ class VisionProcessorNode(Node):
                 detection = self.aruco_detector.detect(self.frame)
                 if detection is not None:
                     self.tracked_object  = CameraTrackedObject()
-                    cv.circle(self.frame, (int(detection[0]), int(detection[1])), 5, (0, 255, 0), -1)
+                    cv.circle(self.frame, (int(detection[0]), int(detection[1])), 50, (0, 0, 255), 15)
                     self.tracked_object.tan_x, self.tracked_object.tan_y = \
                             self.pixel_to_angle(detection[0], detection[1])
             case _:
                 pass
 
         if self.show_debug:
+            end_time = time.perf_counter()
+            execution_time = end_time - start_time
+            self.get_logger().info(
+                        f"Detection took {execution_time:.5f}s",
+                        throttle_duration_sec=1.0
+                    )
             cv.imshow("Debug", self.frame)
             cv.waitKey(1)
 
