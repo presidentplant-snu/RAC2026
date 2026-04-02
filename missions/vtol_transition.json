@@ -1,0 +1,29 @@
+{
+	"version": 1,
+	"mission": {
+		"defaults": {
+			"horizontalVelocity": 5.0,
+			"verticalVelocity": 2.0
+		},
+		"items": [
+			{
+				"type": "takeoff",
+				"altitude": 30.0
+ 			},
+			{
+				"type": "forwardTransition"
+			},
+			{
+				"type": "hold",
+				"duration": 5.0
+			},
+			{
+				"type": "backTransition"
+			},
+			{
+				"type": "rtl"
+			}
+
+		]
+	}
+}

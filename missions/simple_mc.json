@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "mission": {
+  "defaults": {
+      "horizontalVelocity": 5.0,
+      "verticalVelocity": 2.0
+  },
+  "items": [
+    {
+      "type": "takeoff",
+      "arguments": {
+        "altitude": 10.0
+      }
+    },
+    {
+      "type": "navigation",
+      "navigationType": "waypoint",
+      "frame": "global",
+      "x": 37.369517, 
+      "y": 126.718304,
+      "z": 10.0
+    },
+    {
+      "type": "land"
+    }
+  ]
+ }
+}
