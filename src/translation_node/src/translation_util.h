@@ -250,7 +250,7 @@ private:
 			return std::dynamic_pointer_cast<rclcpp::SubscriptionBase>(
 					// Note: template instantiation of subscriptions slows down compilation considerably, see
 					// https://github.com/ros2/rclcpp/issues/1949
-					node.create_subscription<RosMessageType>(topic_name_versioned, rclcpp::QoS(1).best_effort(),
+					node.create_subscription<RosMessageType>(topic_name_versioned, rclcpp::QoS(10).best_effort(),
 															 [on_topic_cb=on_topic_cb, message_buffer](typename RosMessageType::UniquePtr msg) -> void {
 																 *message_buffer = *msg;
 																 on_topic_cb();
@@ -258,7 +258,7 @@ private:
 		};
 		ret.publication_factory = [topic_name_versioned](rclcpp::Node& node) -> rclcpp::PublisherBase::SharedPtr {
 			return std::dynamic_pointer_cast<rclcpp::PublisherBase>(
-					node.create_publisher<RosMessageType>(topic_name_versioned, rclcpp::QoS(1).best_effort()));
+					node.create_publisher<RosMessageType>(topic_name_versioned, rclcpp::QoS(10).best_effort()));
 		};
 
 		ret.max_serialized_message_size = getMaxSerializedMessageSize<RosMessageType>();
