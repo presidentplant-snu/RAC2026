@@ -1,10 +1,10 @@
-#include "vision_tracker_mode.hpp"
+#include "vision_tracker/vision_tracker_mode.hpp"
 #include <px4_ros2/utils/geometry.hpp>
 
 using namespace px4_ros2::literals; // NOLINT
 
 VisionTrackerMode::VisionTrackerMode(rclcpp::Node & node)
-    : ModeBase(node, Settings{mode_name}.preventArming(true))
+    : ModeBase(node, Settings{mode_name}.userSelectable(false))
     , _node(node)
 {
     _trajectory_setpoint  = std::make_shared<px4_ros2::TrajectorySetpointType>(*this);

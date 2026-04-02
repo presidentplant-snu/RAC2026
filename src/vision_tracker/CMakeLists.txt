@@ -70,4 +70,7 @@ if(BUILD_TESTING)
     ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_include_directories(include)
+ament_export_libraries(vision_tracker_mode)
+
 ament_package()

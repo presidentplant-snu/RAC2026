@@ -1,6 +1,6 @@
 #include "rclcpp/rclcpp.hpp"
 
-#include "vision_tracker_mode.hpp"
+#include "vision_tracker/vision_tracker_mode.hpp"
 
 #include <px4_ros2/components/node_with_mode.hpp>
 
