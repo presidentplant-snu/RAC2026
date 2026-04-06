@@ -1,18 +1,23 @@
 #pragma once
-#include <memory>
+
 #include <optional>
+
 #include <rclcpp/rclcpp.hpp>
+
 #include <px4_ros2/mission/trajectory/trajectory_executor.hpp>
 #include <px4_ros2/mission/mission.hpp>
 #include <px4_ros2/components/mode.hpp>
 #include <px4_ros2/odometry/attitude.hpp>
 #include <px4_ros2/odometry/global_position.hpp>
-#include <px4_ros2/control/setpoint_types/multicopter/goto.hpp>
+#include <px4_ros2/control/setpoint_types/experimental/trajectory.hpp>
+#include <px4_ros2/utils/geodesic.hpp>
 
 class FixedWingTrajectoryExecutor : public px4_ros2::TrajectoryExecutorInterface
 {
 public:
-  explicit FixedWingTrajectoryExecutor(px4_ros2::ModeBase & mode, float acceptance_radius = 2.0f);
+  explicit FixedWingTrajectoryExecutor(px4_ros2::ModeBase & mode, 
+		  float acceptance_radius_xy = 4.0f,
+		  float acceptance_radius_z = 4.0f);
 
   ~FixedWingTrajectoryExecutor() override = default;
 
@@ -23,14 +28,19 @@ public:
 
 private:
   void continueNextItem();
-  bool positionReached(const Eigen::Vector3d & target_position_m, float acceptance_radius) const;
-  bool headingReached(float target_heading_rad) const;
+  bool positionReached(const Eigen::Vector3d & target_position_m, 
+		  float acceptance_radius_xy, float acceptance_radius_z) const;
 
   TrajectoryConfig _current_trajectory;
-  const float _acceptance_radius;
+  const float _acceptance_radius_xy;
+  const float _acceptance_radius_z;
+
+  std::unique_ptr<px4_ros2::MapProjection> _map_projection;
+
   std::shared_ptr<px4_ros2::OdometryGlobalPosition> _vehicle_global_position;
   std::shared_ptr<px4_ros2::OdometryAttitude> _vehicle_attitude;
-  std::shared_ptr<px4_ros2::MulticopterGotoGlobalSetpointType> _setpoint;
+
+  std::shared_ptr<px4_ros2::TrajectorySetpointType> _setpoint;
   std::optional<int> _current_index;
   rclcpp::Node & _node;
 };

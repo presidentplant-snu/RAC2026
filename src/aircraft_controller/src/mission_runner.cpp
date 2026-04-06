@@ -1,20 +1,20 @@
 #include <rclcpp/rclcpp.hpp>
 
-#include <px4_ros2/mission/trajectory/multicopter/waypoint_trajectory_executor.hpp>
-
 #include "mission_runner.hpp"
 
 #include "actions/vtol_actions.hpp"
 #include "actions/vision_tracker_mode_action.hpp"
+#include "actions/precise_goto_action.hpp"
+#include "actions/update_aircraft_state_action.hpp"
 
 #include "trajectory/vtol_trajectory_executor.hpp"
-#include "trajectory/fw_trajectory_executor.hpp"
 
 
 std::shared_ptr<MissionRunnerNode> MissionRunnerNode::create()
 {
 	// Can't use make_shared here because constructor is private; use new directly.
 	auto node = std::shared_ptr<MissionRunnerNode>(new MissionRunnerNode());
+
 	node->init();
 	return node;
 }
@@ -34,23 +34,39 @@ void MissionRunnerNode::init()
 	RCLCPP_INFO(get_logger(), "Loading mission from: %s", mission_file.c_str());
 
 	// -----------------------------------------------------------------
+	// Add aircraft state message and publisher
+	// -----------------------------------------------------------------
+
+	_aircraft_state = std::make_shared<aircraft_msgs::msg::AircraftState>();
+
+	_aircraft_state_pub = this->create_publisher<aircraft_msgs::msg::AircraftState>(
+			kAircraftStateTopicName, rclcpp::QoS(1).transient_local());
+
+	_aircraft_state_timer = this->create_wall_timer(
+			std::chrono::seconds(0.5),
+			[this]() { _aircraft_state_pub->publish(*_aircraft_state); });
+
+	// -----------------------------------------------------------------
 	// Build MissionExecutor configuration
 	// -----------------------------------------------------------------
 	px4_ros2::MissionExecutor::Configuration config;
 	
 	// TODO: Test VTOL Trajectory Executor
-	config.withTrajectoryExecutor<px4_ros2::multicopter::WaypointTrajectoryExecutor>();
+	config.withTrajectoryExecutor<VTOLTrajectoryExecutor>(_aircraft_state);
 
 	// =================================================================
 	// Register custom actions 
 	constexpr uint8_t vision_tracker_mode_id = 23;
+
 	config.addCustomAction<VisionTrackerModeAction>(vision_tracker_mode_id);
 	config.addCustomAction<VTOLForwardTransitionAction>();
 	config.addCustomAction<VTOLBackTransitionAction>();
+	config.addCustomAction<UpdateAircraftStateAction>(_aircraft_state);
 	// =================================================================
 
 	// TODO: Check if persistencefile works well.
 	// config.withPersistenceFile("/app/missions/.state");
+
 
 	// -----------------------------------------------------------------
 	// Create executor

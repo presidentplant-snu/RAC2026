@@ -6,4 +6,4 @@ uint8 TRACK_ARUCO = 2
 uint8 current_phase
 
 # LLA
-float32[2] next_waypoint
+float32[3] next_waypoint

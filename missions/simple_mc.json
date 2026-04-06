@@ -8,9 +8,7 @@
   "items": [
     {
       "type": "takeoff",
-      "arguments": {
         "altitude": 10.0
-      }
     },
     {
       "type": "navigation",

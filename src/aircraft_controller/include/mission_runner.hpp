@@ -5,8 +5,10 @@
 #include <px4_ros2/mission/mission.hpp>
 #include <px4_ros2/mission/mission_executor.hpp>
 
+#include <aircraft_msgs/msg/aircraft_state.hpp>
 
 static const std::string kNodeName = "mission_runner";
+static const std::string kAircraftStateTopicName = "/aircraft_state";
 
 class MissionRunnerNode : public rclcpp::Node
 {
@@ -26,7 +28,13 @@ private:
 
   std::unique_ptr<px4_ros2::MissionExecutor> _executor;
   std::unique_ptr<px4_ros2::MissionFileMonitor> _monitor;
-};
 
+  std::shared_ptr<aircraft_msgs::msg::AircraftState> _aircraft_state;
+
+  rclcpp::Publisher<aircraft_msgs::msg::AircraftState>::SharedPtr _aircraft_state_pub;
+  rclcpp::TimerBase::SharedPtr _aircraft_state_timer;
+
+
+};
 
 int main(int argc, char * argv[]);

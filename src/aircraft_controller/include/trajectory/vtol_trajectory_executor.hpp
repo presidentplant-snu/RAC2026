@@ -8,16 +8,22 @@
 #include <px4_ros2/control/vtol.hpp>
 #include <px4_ros2/components/mode.hpp>
 
+#include <aircraft_msgs/msg/aircraft_state.hpp>
+
+#include <px4_ros2/mission/trajectory/multicopter/waypoint_trajectory_executor.hpp>
+#include "trajectory/fw_trajectory_executor.hpp"
+
 class VTOLTrajectoryExecutor: public px4_ros2::TrajectoryExecutorInterface
 {
 	public:
 		explicit VTOLTrajectoryExecutor(px4_ros2::ModeBase & mode,
-				std::shared_ptr<px4_ros2::TrajectoryExecutorInterface> mc_trajectory_executor,
-				std::shared_ptr<px4_ros2::TrajectoryExecutorInterface> fw_trajectory_executor)
+				std::shared_ptr<aircraft_msgs::msg::AircraftState> aircraft_state)
 			: _node(mode.node()),
-			_mc_trajectory_executor(mc_trajectory_executor),
-			_fw_trajectory_executor(fw_trajectory_executor)
+			_aircraft_state(aircraft_state)
+
 	{
+		_mc_trajectory_executor = std::make_shared<px4_ros2::multicopter::WaypointTrajectoryExecutor>(mode, 2.0f);
+		_fw_trajectory_executor = std::make_shared<FixedWingTrajectoryExecutor>(mode, 4.0f, 4.0f);
 		_vtol = std::make_shared<px4_ros2::VTOL>(mode);
 	}
 
@@ -39,8 +45,6 @@ class VTOLTrajectoryExecutor: public px4_ros2::TrajectoryExecutorInterface
 			if (auto* exec = activeExecutor()) exec->runTrajectory(config);
 		}
 
-
-
 	private:
 		px4_ros2::TrajectoryExecutorInterface* activeExecutor(){
 
@@ -55,7 +59,7 @@ class VTOLTrajectoryExecutor: public px4_ros2::TrajectoryExecutorInterface
 				default:
 					RCLCPP_WARN_THROTTLE(_node.get_logger(), *_node.get_clock(), 
 							1000, 
-							"VTOL State undefined, cannot continue with waypoint! AHH");
+							"VTOL State undefined, not sending any waypoints for now!");
 					return nullptr;
 					break;
 			}
@@ -66,4 +70,6 @@ class VTOLTrajectoryExecutor: public px4_ros2::TrajectoryExecutorInterface
 
 		std::shared_ptr<px4_ros2::TrajectoryExecutorInterface> _mc_trajectory_executor;
 		std::shared_ptr<px4_ros2::TrajectoryExecutorInterface> _fw_trajectory_executor;
+
+		std::shared_ptr<aircraft_msgs::msg::AircraftState> _aircraft_state;
 };
