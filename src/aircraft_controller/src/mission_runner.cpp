@@ -9,6 +9,7 @@
 
 #include "trajectory/vtol_trajectory_executor.hpp"
 
+using namespace std::chrono_literals;
 
 std::shared_ptr<MissionRunnerNode> MissionRunnerNode::create()
 {
@@ -43,7 +44,7 @@ void MissionRunnerNode::init()
 			kAircraftStateTopicName, rclcpp::QoS(1).transient_local());
 
 	_aircraft_state_timer = this->create_wall_timer(
-			std::chrono::seconds(0.5),
+			500ms,
 			[this]() { _aircraft_state_pub->publish(*_aircraft_state); });
 
 	// -----------------------------------------------------------------
@@ -62,6 +63,8 @@ void MissionRunnerNode::init()
 	config.addCustomAction<VTOLForwardTransitionAction>();
 	config.addCustomAction<VTOLBackTransitionAction>();
 	config.addCustomAction<UpdateAircraftStateAction>(_aircraft_state);
+
+	config.addCustomAction<PreciseGoToAction>();
 	// =================================================================
 
 	// TODO: Check if persistencefile works well.
