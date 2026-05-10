@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <optional>
@@ -7,9 +8,8 @@
 #include <px4_ros2/mission/trajectory/trajectory_executor.hpp>
 #include <px4_ros2/mission/mission.hpp>
 #include <px4_ros2/components/mode.hpp>
-#include <px4_ros2/odometry/attitude.hpp>
 #include <px4_ros2/odometry/global_position.hpp>
-#include <px4_ros2/control/setpoint_types/experimental/trajectory.hpp>
+#include <px4_ros2/control/setpoint_types/fixedwing/lateral_longitudinal.hpp>
 #include <px4_ros2/utils/geodesic.hpp>
 
 class FixedWingTrajectoryExecutor : public px4_ros2::TrajectoryExecutorInterface
@@ -35,12 +35,8 @@ private:
   const float _acceptance_radius_xy;
   const float _acceptance_radius_z;
 
-  std::unique_ptr<px4_ros2::MapProjection> _map_projection;
-
   std::shared_ptr<px4_ros2::OdometryGlobalPosition> _vehicle_global_position;
-  std::shared_ptr<px4_ros2::OdometryAttitude> _vehicle_attitude;
-
-  std::shared_ptr<px4_ros2::TrajectorySetpointType> _setpoint;
+  std::shared_ptr<px4_ros2::FwLateralLongitudinalSetpointType> _setpoint;
   std::optional<int> _current_index;
   rclcpp::Node & _node;
 };

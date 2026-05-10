@@ -1,0 +1,66 @@
+{
+	"version": 1,
+	"mission": {
+		"defaults": {
+			"horizontalVelocity": 5.0,
+			"verticalVelocity": 2.0
+		},
+		"items": [
+			{
+				"type": "takeoff",
+				"altitude": 30.0
+			},
+			{
+				"type": "navigation",
+				"navigationType": "waypoint",
+				"frame": "global",
+				"x": 37.3705,
+				"y": 126.7185,
+				"z": 30.0
+			},
+			{
+				"type": "preciseGoTo",
+				"lat": 37.3715,
+				"lon": 126.7185,
+				"alt": 30.0,
+				"heading": 90.0,
+				"positionPrecision": 2.0,
+				"headingPrecision": 5.0,
+				"dwellTime": 2.0
+			},
+			{
+				"type": "forwardTransition"
+			},
+			{
+				"type": "navigation",
+				"navigationType": "waypoint",
+				"frame": "global",
+				"x": 37.3730,
+				"y": 126.7210,
+				"z": 60.0
+			},
+			{
+				"type": "navigation",
+				"navigationType": "waypoint",
+				"frame": "global",
+				"x": 37.3730,
+				"y": 126.7255,
+				"z": 60.0
+			},
+			{
+				"type": "navigation",
+				"navigationType": "waypoint",
+				"frame": "global",
+				"x": 37.3700,
+				"y": 126.7240,
+				"z": 60.0
+			},
+			{
+				"type": "backTransition"
+			},
+			{
+				"type": "rtl"
+			}
+		]
+	}
+}

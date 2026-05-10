@@ -1,19 +1,14 @@
 #include "trajectory/fw_trajectory_executor.hpp"
 
-
-using namespace px4_ros2::literals; // NOLINT
-
 FixedWingTrajectoryExecutor::FixedWingTrajectoryExecutor(
 		px4_ros2::ModeBase & mode,
 		float acceptance_radius_xy, float acceptance_radius_z)
-	: _acceptance_radius_xy(acceptance_radius_xy), 
-	_acceptance_radius_z(acceptance_radius_z), 
-	_map_projection(std::make_unique<px4_ros2::MapProjection>(mode)),
+	: _acceptance_radius_xy(acceptance_radius_xy),
+	_acceptance_radius_z(acceptance_radius_z),
 	_node(mode.node())
 {
-	_setpoint = std::make_shared<px4_ros2::TrajectorySetpointType>(mode);
+	_setpoint = std::make_shared<px4_ros2::FwLateralLongitudinalSetpointType>(mode);
 	_vehicle_global_position = std::make_shared<px4_ros2::OdometryGlobalPosition>(mode);
-	_vehicle_attitude = std::make_shared<px4_ros2::OdometryAttitude>(mode);
 }
 
 bool FixedWingTrajectoryExecutor::navigationItemTypeSupported(px4_ros2::NavigationItemType type)
@@ -53,19 +48,14 @@ void FixedWingTrajectoryExecutor::updateSetpoint()
 
 	const auto & waypoint = std::get<px4_ros2::Waypoint>(navigation_item->data);
 
-	if (!_map_projection->isInitialized()) {
-		RCLCPP_ERROR_ONCE(
-				_node.get_logger(),
-				"Goto global setpoint update failed: map projection is uninitialized. Is fmu/out/vehicle_local_position published?");
-		return;
-	}
+	const Eigen::Vector3d & target = waypoint.coordinate;
+	const float course = px4_ros2::headingToGlobalPosition(
+			_vehicle_global_position->position(), target);
+	const float altitude_amsl = static_cast<float>(target.z());
 
-	const Eigen::Vector3d target_position = waypoint.coordinate;
-  	const Eigen::Vector3f target_position_local = _map_projection->globalToLocal(target_position);
+	_setpoint->updateWithAltitude(altitude_amsl, course);
 
-	_setpoint->updatePosition(target_position_local);
-
-	if (positionReached(target_position, _acceptance_radius_xy, _acceptance_radius_z)) {
+	if (positionReached(target, _acceptance_radius_xy, _acceptance_radius_z)) {
 		continueNextItem();
 	}
 }
