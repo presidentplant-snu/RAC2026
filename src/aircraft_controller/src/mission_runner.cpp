@@ -77,6 +77,8 @@ void MissionRunnerNode::init()
 	_executor = std::make_unique<px4_ros2::MissionExecutor>(
 			"RAC2026_Mission", config, *this);
 
+	_executor->setSkipMessageCompatibilityCheck();
+
 	// -----------------------------------------------------------------
 	// Callbacks
 	// -----------------------------------------------------------------
