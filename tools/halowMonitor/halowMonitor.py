@@ -5,11 +5,13 @@ Monitors link statistics via SSH and displays real-time metrics
 """
 
 import argparse
+import csv
 import json
+import os
 import re
 import sys
 import time
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Dict, Optional
 
 try:
@@ -36,7 +38,18 @@ class Colors:
 
 
 class MorseMonitor:
-    def __init__(self, host: str, user: str, password: str, port: int, interface: str, use_color: bool):
+    CSV_FIELDS = [
+        'timestamp', 'signal', 'signal_avg', 'noise', 'snr',
+        'tx_bitrate', 'rx_bitrate', 'expected_throughput',
+        'tx_success_pct', 'tx_retries', 'tx_failed', 'tx_ack_timeout',
+        'rx_total', 'rx_pass_fcs', 'rx_pass_fcs_pct',
+        'ampdu_tx', 'ampdu_rx',
+        'temperature', 'apps_cpu', 'mac_cpu', 'phy_cpu',
+        'uptime_s', 'connected_time_s',
+    ]
+
+    def __init__(self, host: str, user: str, password: str, port: int, interface: str,
+                 use_color: bool, csv_path: Optional[str]):
         self.host = host
         self.user = user
         self.password = password
@@ -46,7 +59,16 @@ class MorseMonitor:
         self.ssh = None
         self.cycle_count = 0
         self.cached_stats = {}
-        
+        self.csv_file = None
+        self.csv_writer = None
+
+        if csv_path:
+            write_header = not os.path.exists(csv_path)
+            self.csv_file = open(csv_path, 'a', newline='')
+            self.csv_writer = csv.DictWriter(self.csv_file, fieldnames=self.CSV_FIELDS)
+            if write_header:
+                self.csv_writer.writeheader()
+
         if not use_color:
             Colors.disable()
     
@@ -71,6 +93,8 @@ class MorseMonitor:
         """Close SSH connection"""
         if self.ssh:
             self.ssh.close()
+        if self.csv_file:
+            self.csv_file.close()
     
     def exec_command(self, cmd: str) -> str:
         """Execute SSH command and return output"""
@@ -186,6 +210,51 @@ class MorseMonitor:
         else:
             return f"{Colors.RED}{formatted}{Colors.RESET}"
     
+    def write_csv_row(self, iw_stats: Optional[Dict], morse_stats: Dict):
+        """Append one row of metrics to the CSV file"""
+        if not self.csv_writer:
+            return
+
+        signal = iw_stats.get('signal', '') if iw_stats else ''
+        signal_avg = iw_stats.get('signal_avg', '') if iw_stats else ''
+        noise = morse_stats.get('noise', '')
+        snr = (signal - noise) if (signal != '' and noise != '') else ''
+
+        rx_total = morse_stats.get('rx_total', 0)
+        rx_pass = morse_stats.get('rx_pass_fcs', 0)
+        rx_pass_pct = round(rx_pass / rx_total * 100, 2) if rx_total > 0 else ''
+
+        uptime_s = int(morse_stats.get('uptime', 0) / 1_000_000)
+        connected_s = iw_stats.get('connected_time', '') if iw_stats else ''
+
+        row = {
+            'timestamp': datetime.now().isoformat(timespec='seconds'),
+            'signal': signal,
+            'signal_avg': signal_avg,
+            'noise': noise,
+            'snr': snr,
+            'tx_bitrate': iw_stats.get('tx_bitrate', '') if iw_stats else '',
+            'rx_bitrate': iw_stats.get('rx_bitrate', '') if iw_stats else '',
+            'expected_throughput': iw_stats.get('expected_throughput', '') if iw_stats else '',
+            'tx_success_pct': morse_stats.get('tx_success_pct', ''),
+            'tx_retries': iw_stats.get('tx_retries', '') if iw_stats else '',
+            'tx_failed': iw_stats.get('tx_failed', '') if iw_stats else '',
+            'tx_ack_timeout': morse_stats.get('tx_ack_timeout', ''),
+            'rx_total': rx_total,
+            'rx_pass_fcs': rx_pass,
+            'rx_pass_fcs_pct': rx_pass_pct,
+            'ampdu_tx': morse_stats.get('ampdu_tx', ''),
+            'ampdu_rx': morse_stats.get('ampdu_rx', ''),
+            'temperature': morse_stats.get('temperature', ''),
+            'apps_cpu': round(morse_stats.get('apps_cpu', 0) / 10.0, 1),
+            'mac_cpu': round(morse_stats.get('mac_cpu', 0) / 10.0, 1),
+            'phy_cpu': round(morse_stats.get('phy_cpu', 0) / 10.0, 1),
+            'uptime_s': uptime_s,
+            'connected_time_s': connected_s,
+        }
+        self.csv_writer.writerow(row)
+        self.csv_file.flush()
+
     def display_stats(self, iw_stats: Dict, morse_stats: Dict):
         """Display formatted statistics"""
         # Clear screen and move cursor to top
@@ -293,6 +362,7 @@ class MorseMonitor:
                 iw_stats = self.get_iw_stats()
                 morse_stats = self.get_morse_stats()
                 self.display_stats(iw_stats, morse_stats)
+                self.write_csv_row(iw_stats, morse_stats)
                 time.sleep(interval)
         
         except KeyboardInterrupt:
@@ -321,16 +391,19 @@ def main():
                         help='Wireless interface name')
     parser.add_argument('--no-color', action='store_true',
                         help='Disable color output')
-    
+    parser.add_argument('--csv', metavar='FILE',
+                        help='Append metrics to a CSV file each cycle')
+
     args = parser.parse_args()
-    
+
     monitor = MorseMonitor(
         host=args.host,
         user=args.user,
         password=args.password,
         port=args.port,
         interface=args.interface,
-        use_color=not args.no_color
+        use_color=not args.no_color,
+        csv_path=args.csv,
     )
     
     monitor.run(args.interval)
