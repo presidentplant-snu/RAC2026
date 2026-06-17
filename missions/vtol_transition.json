@@ -11,7 +11,13 @@
 				"altitude": 30.0
  			},
 			{
-				"type": "forwardTransition"
+				"type": "hold",
+				"duration": 5.0
+			},
+			{
+				"type": "forwardTransition",
+				"heading": 90.0,
+				"acceleration": 1.0
 			},
 			{
 				"type": "hold",
