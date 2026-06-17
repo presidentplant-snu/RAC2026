@@ -48,6 +48,17 @@ void VTOLTransitionAction::runTransition(
     });
 }
 
+void VTOLTransitionAction::parseAcceleration(const px4_ros2::ActionArguments & arguments)
+{
+    if (arguments.contains("acceleration")) {
+        _acceleration = arguments.at<float>("acceleration");
+        RCLCPP_INFO(_node.get_logger(),
+            "VTOL transition acceleration %.2f m/s^2", *_acceleration);
+    } else {
+        _acceleration.reset();
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Forward transition: Multicopter -> Fixed-wing
 // ---------------------------------------------------------------------------
@@ -59,9 +70,9 @@ bool VTOLForwardTransitionAction::runTick(float course_sp)
         case px4_ros2::VTOL::State::TransitionToFixedWing: {
             // Accelerate forward along the course at the configured rate, or fall
             // back to the library default (~zero) if none was given.
-            const Eigen::Vector3f acceleration_sp = _forward_acceleration
-                ? Eigen::Vector3f{*_forward_acceleration * std::cos(course_sp),
-                                  *_forward_acceleration * std::sin(course_sp),
+            const Eigen::Vector3f acceleration_sp = _acceleration
+                ? Eigen::Vector3f{*_acceleration * std::cos(course_sp),
+                                  *_acceleration * std::sin(course_sp),
                                   NAN}
                 : _vtol->computeAccelerationSetpointDuringTransition();
             sendTransitionSetpoint(course_sp, acceleration_sp);
@@ -71,8 +82,8 @@ bool VTOLForwardTransitionAction::runTick(float course_sp)
             // Done — the fixed-wing trajectory executor takes over from here.
             return true;
         default:
-	    _vtol->toFixedwing();
             // Still in multicopter: hold position while the command takes effect.
+	    _vtol->toFixedwing();
             return false;
     }
 }
@@ -95,13 +106,7 @@ void VTOLForwardTransitionAction::run(
             px4_ros2::radToDeg(course_sp));
     }
 
-    if (arguments.contains("acceleration")) {
-        _forward_acceleration = arguments.at<float>("acceleration");
-        RCLCPP_INFO(_node.get_logger(),
-            "Forward transition acceleration %.2f m/s^2", *_forward_acceleration);
-    } else {
-        _forward_acceleration.reset();
-    }
+    parseAcceleration(arguments);
 
     runTransition(on_completed, course_sp);
 }
@@ -115,8 +120,10 @@ bool VTOLBackTransitionAction::runTick(float course_sp)
 
     switch (_vtol->getCurrentState()) {
         case px4_ros2::VTOL::State::TransitionToMulticopter:
+            // The library computes the deceleration setpoint; _acceleration (if
+            // set) overrides the back-transition deceleration target.
             sendTransitionSetpoint(course_sp,
-                _vtol->computeAccelerationSetpointDuringTransition());
+                _vtol->computeAccelerationSetpointDuringTransition(_acceleration));
             return false;
         case px4_ros2::VTOL::State::Multicopter:
             // Reached multicopter: hold position, then let the mission continue.
@@ -132,12 +139,15 @@ bool VTOLBackTransitionAction::runTick(float course_sp)
 
 void VTOLBackTransitionAction::run(
     const std::shared_ptr<px4_ros2::ActionHandler> &,
-    const px4_ros2::ActionArguments &,
+    const px4_ros2::ActionArguments & arguments,
     const std::function<void()> & on_completed)
 {
     const float course_sp = currentHeading();
     RCLCPP_INFO(_node.get_logger(),
         "Starting back transition, holding heading %.1f deg",
         px4_ros2::radToDeg(course_sp));
+
+    parseAcceleration(arguments);
+
     runTransition(on_completed, course_sp);
 }

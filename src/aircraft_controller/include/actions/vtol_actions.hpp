@@ -34,6 +34,11 @@ protected:
     // acceleration setpoint along track.
     void sendTransitionSetpoint(float course_sp, const Eigen::Vector3f & acceleration_sp);
 
+    // Parse the optional "acceleration" [m/s^2] argument shared by both
+    // transitions into _acceleration (reset if absent). Forward applies it along
+    // the course; back uses it as the back-transition deceleration target.
+    void parseAcceleration(const px4_ros2::ActionArguments & arguments);
+
     float currentHeading() const { return _vehicle_local_position->heading(); }
 
     rclcpp::Node & _node;
@@ -42,6 +47,11 @@ protected:
     std::shared_ptr<px4_ros2::FwLateralLongitudinalSetpointType> _fixed_wing_setpoint;
     std::shared_ptr<px4_ros2::OdometryLocalPosition> _vehicle_local_position;
     rclcpp::TimerBase::SharedPtr _timer;
+
+    // Optional transition acceleration [m/s^2]. If unset, the library default is
+    // used (~zero for the forward transition, the configured deceleration for the
+    // back transition).
+    std::optional<float> _acceleration;
 };
 
 class VTOLForwardTransitionAction : public VTOLTransitionAction
@@ -54,10 +64,6 @@ public:
              const std::function<void()> & on_completed) override;
 protected:
     bool runTick(float course_sp) override;
-private:
-    // Optional forward acceleration [m/s^2] applied along the course during the
-    // transition. If unset, the library default is used (which is ~zero).
-    std::optional<float> _forward_acceleration;
 };
 
 class VTOLBackTransitionAction : public VTOLTransitionAction
