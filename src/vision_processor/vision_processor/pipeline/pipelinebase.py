@@ -10,6 +10,19 @@ class VideoPipelineBase(ABC):
     def __init__(self):
         self.frame: np.ndarray | None = None
         self._frame_lock: threading.RLock = threading.RLock()
+        self.pipeline: Gst.Element | None = None
+        self._loop: GLib.MainLoop | None = None
+
+    def stop(self) -> None:
+        """Request a graceful shutdown of the running pipeline.
+
+        Quits the GLib main loop (thread-safe), which lets run()'s `finally`
+        set the GStreamer pipeline to NULL. For rtspsrc this is what triggers
+        the RTSP TEARDOWN so the server stops streaming.
+        """
+        loop = self._loop
+        if loop is not None and loop.is_running():
+            loop.quit()
 
     def _set_frame(self, frame: np.ndarray) -> None:
         """Write a new frame."""
