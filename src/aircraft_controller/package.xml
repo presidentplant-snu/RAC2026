@@ -21,6 +21,8 @@
   <depend>aircraft_msgs</depend>
   <depend>vision_tracker</depend>
 
+  <exec_depend>aircraft_logger</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
