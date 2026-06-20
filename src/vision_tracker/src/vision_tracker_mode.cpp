@@ -4,7 +4,7 @@
 using namespace px4_ros2::literals; // NOLINT
 
 VisionTrackerMode::VisionTrackerMode(rclcpp::Node & node)
-    : ModeBase(node, Settings{mode_name}.userSelectable(false))
+    : ModeBase(node, Settings{mode_name}.userSelectable(true))
     , _node(node)
 {
     _trajectory_setpoint  = std::make_shared<px4_ros2::TrajectorySetpointType>(*this);
