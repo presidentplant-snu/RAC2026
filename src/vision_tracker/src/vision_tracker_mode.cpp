@@ -80,7 +80,11 @@ void VisionTrackerMode::sendTrackedSetpoint(const Eigen::Vector3f & raw_target,
 
     const float current_z   = _vehicle_local_position->positionNed()(2);
     const float z_error     = z_target_ned - current_z;
-    // Clamp descent velocity: only descend (positive NED = down), don't climb here
+    // Feed-forward Z velocity toward z_target_ned, magnitude-limited to
+    // descend_vel. Z itself is position-controlled (withPositionZ below), so this
+    // only shapes the approach; net motion is descent since each state's target
+    // altitude is below the previous one. The sign is kept symmetric so the
+    // position loop can still correct a small overshoot below the target.
 	const float vz = std::clamp(z_error * 0.5f, -descend_vel, descend_vel);
 
     px4_ros2::TrajectorySetpoint sp;

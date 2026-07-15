@@ -40,15 +40,10 @@ class VisionProcessorNode(Node):
         if self.use_gazebo:
             self.pipeline = GazeboPipeline()
         else:
-            self.pipeline = SIYIPipeline(target_ip="srt://192.168.10.36:5000", hw_accel=True)
+            self.pipeline = SIYIPipeline(target_ip=self.srt_uri, hw_accel=True)
         
         self.pipeline_thread = threading.Thread(target=self.pipeline.run, daemon=True)
         self.pipeline_thread.start()
-
-        self.camera_w = 1920
-        self.camera_h = 1080
-        self.camera_fov_w = 80 # degrees
-        self.camera_fov_h = 80*9/16 # degrees
 
         self.aruco_detector = ArucoDetector()
 
@@ -80,13 +75,33 @@ class VisionProcessorNode(Node):
                 ('use_gazebo', False),
                 ('show_debug', False),
                 ('patient_model_path',
-                 '/home/radxa/RAC2026/model/yolo26n_1280_3out_int8.onnx')
+                 '/home/radxa/RAC2026/model/yolo26n_1280_3out_int8.onnx'),
+                # SRT endpoint the SIYI pipeline re-streams to (srtsink, caller);
+                # the stream_viewer reads the same URI as its srtsrc listener.
+                ('srt_uri', 'srt://192.168.10.36:5000'),
+                # Camera geometry. FOVs are the full angular field of view in
+                # degrees; offsets are the camera position relative to the
+                # vehicle CG in meters (passed through to the tracked object).
+                ('camera_width', 1920),
+                ('camera_height', 1080),
+                ('camera_fov_w', 80.0),
+                ('camera_fov_h', 45.0),
+                ('camera_offset_x', 0.0),
+                ('camera_offset_y', 0.0),
             ]
         )
 
         self.use_gazebo = self.get_parameter('use_gazebo').value
         self.show_debug = self.get_parameter('show_debug').value
         self.patient_model_path = self.get_parameter('patient_model_path').value
+        self.srt_uri = self.get_parameter('srt_uri').value
+
+        self.camera_w = self.get_parameter('camera_width').value
+        self.camera_h = self.get_parameter('camera_height').value
+        self.camera_fov_w = self.get_parameter('camera_fov_w').value
+        self.camera_fov_h = self.get_parameter('camera_fov_h').value
+        self.camera_offset_x = self.get_parameter('camera_offset_x').value
+        self.camera_offset_y = self.get_parameter('camera_offset_y').value
         
 
     def _aircraft_state_callback(self, msg):
@@ -108,24 +123,32 @@ class VisionProcessorNode(Node):
         if self.show_debug:
             start_time = time.perf_counter()
 
+        detection = None
         match self.aircraft_state.track_type:
             case AircraftState.TRACK_PATIENT:
                 if self.patient_detector is not None:
                     detection = self.patient_detector.detect(self.frame)
                     if detection is not None:
-                        self.tracked_object = CameraTrackedObject()
                         cv.circle(self.frame, (int(detection[0]), int(detection[1])), 50, (255, 0, 0), 15)
-                        self.tracked_object.tan_x, self.tracked_object.tan_y = \
-                                self.pixel_to_angle(detection[0], detection[1])
             case AircraftState.TRACK_ARUCO:
                 detection = self.aruco_detector.detect(self.frame)
                 if detection is not None:
-                    self.tracked_object  = CameraTrackedObject()
                     cv.circle(self.frame, (int(detection[0]), int(detection[1])), 50, (0, 0, 255), 15)
-                    self.tracked_object.tan_x, self.tracked_object.tan_y = \
-                            self.pixel_to_angle(detection[0], detection[1])
             case _:
                 pass
+
+        # Build a fresh message every cycle so we never republish a stale hit.
+        # A live detection carries the target angle; otherwise publish NaN so the
+        # downstream tracker invalidates its target instead of chasing a ghost.
+        self.tracked_object = CameraTrackedObject()
+        self.tracked_object.offset_x = self.camera_offset_x
+        self.tracked_object.offset_y = self.camera_offset_y
+        if detection is not None:
+            self.tracked_object.tan_x, self.tracked_object.tan_y = \
+                    self.pixel_to_angle(detection[0], detection[1])
+        else:
+            self.tracked_object.tan_x = float('nan')
+            self.tracked_object.tan_y = float('nan')
 
         if self.show_debug:
             end_time = time.perf_counter()
@@ -136,9 +159,6 @@ class VisionProcessorNode(Node):
                     )
             cv.imshow("Debug", self.frame)
             cv.waitKey(1)
-
-        if self.tracked_object is None:
-            return
 
         self.tracked_object_publisher.publish(self.tracked_object)
 

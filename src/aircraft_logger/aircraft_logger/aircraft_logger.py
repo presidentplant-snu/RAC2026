@@ -68,9 +68,11 @@ class AircraftLogger(Node):
     # TODO: Add vehicle state subscription
     def _setup_subscribers(self):
         def _get_message_name_version(msg_class):
-            if msg_class.MESSAGE_VERSION == 0:
+            # Unversioned messages (e.g. SensorGps) don't define MESSAGE_VERSION.
+            version = getattr(msg_class, "MESSAGE_VERSION", 0)
+            if version == 0:
                 return ""
-            return f"_v{msg_class.MESSAGE_VERSION}"
+            return f"_v{version}"
 
         qos_profile = QoSPresetProfiles.SENSOR_DATA.value
 
@@ -90,7 +92,7 @@ class AircraftLogger(Node):
 
         self.vehicle_gps_subscriber = self.create_subscription(
             SensorGps,
-            f"/fmu/out/vehicle_gps_position",
+            f"/fmu/out/vehicle_gps_position{_get_message_name_version(SensorGps)}",
             self._vehicle_gps_callback,
             qos_profile,
         )
@@ -120,7 +122,7 @@ class AircraftLogger(Node):
         log_entry = LogEntry(
                 autoflag=False,
                 wpt_num=0,
-                gps_time=float(self.vehicle_gps.time_utc_usec)/100000,
+                gps_time=float(self.vehicle_gps.time_utc_usec)/1e6,
                 latitude = self.vehicle_gps.latitude_deg,
                 longitude = self.vehicle_gps.longitude_deg,
                 altitude = self.vehicle_gps.altitude_ellipsoid_m,
@@ -150,6 +152,10 @@ class AircraftLogger(Node):
             self.get_logger().warn("GPS Fixtype <= 2")
         if msg.timestamp == 0:
             self.get_logger().warn("GPS Time == 0")
+        # time_utc_usec is the field actually logged; it stays 0 until the
+        # receiver gets a UTC fix, even when timestamp (driver boot time) is set.
+        if msg.time_utc_usec == 0:
+            self.get_logger().warn("GPS UTC time == 0 (no UTC fix yet)")
 
         self.vehicle_gps = msg
 

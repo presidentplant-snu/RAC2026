@@ -1,0 +1,37 @@
+# Parameters for the vision_processor package runnables (vision_processor and
+# stream_viewer). The `/**` wildcard applies to any node name; each node only
+# picks up the parameters it declares, so the shared camera FOV keeps the
+# stream_viewer overlay lined up with the vision_processor detections.
+# Edit and relaunch (no rebuild needed) to retune.
+/**:
+  ros__parameters:
+    # --- Shared camera geometry ---
+    # Sensor resolution (px). Must match the frames the pipeline delivers.
+    camera_width: 1920
+    camera_height: 1080
+    # Full angular field of view (degrees).
+    camera_fov_w: 80.0
+    camera_fov_h: 45.0
+    # Camera offset from the vehicle CG (meters), forwarded to the tracker.
+    camera_offset_x: 0.0
+    camera_offset_y: 0.0
+
+    # --- Shared SRT link ---
+    # The SIYI pipeline re-streams the camera to this endpoint (srtsink, caller)
+    # and the stream_viewer reads from it (srtsrc, listener). On the vision
+    # processor this is only used when use_gazebo is false.
+    srt_uri: "srt://192.168.10.36:5000"
+
+    # --- vision_processor ---
+    # Use the Gazebo UDP pipeline instead of the SIYI camera.
+    use_gazebo: false
+    # Show the annotated debug window.
+    show_debug: false
+    # Patient ONNX model (empty string disables patient detection).
+    patient_model_path: "/home/radxa/RAC2026/model/yolo26n_1280_3out_int8.onnx"
+
+    # --- stream_viewer ---
+    # srtsrc receive-buffer latency in ms, also used to delay the overlay.
+    srt_latency: 100
+    # How long a marker stays on screen after its detection (s).
+    marker_timeout: 1.0

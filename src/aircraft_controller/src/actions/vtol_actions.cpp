@@ -82,8 +82,8 @@ bool VTOLForwardTransitionAction::runTick(float course_sp)
             // Done — the fixed-wing trajectory executor takes over from here.
             return true;
         default:
-            // Still in multicopter: hold position while the command takes effect.
-	    _vtol->toFixedwing();
+            // Still in multicopter: the toFixedwing() at the top of the tick has
+            // already issued the command; just wait for it to take effect.
             return false;
     }
 }

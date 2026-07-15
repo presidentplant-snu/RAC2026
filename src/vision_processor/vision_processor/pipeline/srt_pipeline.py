@@ -26,9 +26,10 @@ class SRTPipeline(VideoPipelineBase):
         self.pipeline.set_state(Gst.State.PLAYING)
 
         context = GLib.MainContext.new()  # isolated context, not the default
-        loop = GLib.MainLoop.new(context, False)
+        self._loop = GLib.MainLoop.new(context, False)
         context.push_thread_default()
         try:
-            loop.run()
+            self._loop.run()
         finally:
             self.pipeline.set_state(Gst.State.NULL)
+            context.pop_thread_default()

@@ -29,10 +29,6 @@ class StreamViewerNode(Node):
         # once srt_latency has elapsed, so markers line up with the video.
         self.pending_objects: deque[tuple[float, CameraTrackedObject]] = deque()
 
-        # Must match the camera parameters in vision_processor.py
-        self.camera_fov_w = 80 # degrees
-        self.camera_fov_h = 80*9/16 # degrees
-
         self.setup_ros2()
 
         self.pipeline = SRTPipeline(listen_uri=self.srt_uri, latency=self.srt_latency)
@@ -54,15 +50,21 @@ class StreamViewerNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('srt_uri', 'srt://:5000'),
+                ('srt_uri', 'srt://192.168.10.36:5000'),
                 ('srt_latency', 100),
-                ('marker_timeout', 1.0)
+                ('marker_timeout', 1.0),
+                # Must match the camera FOV parameters in vision_processor so the
+                # overlaid markers line up with the detections.
+                ('camera_fov_w', 80.0),
+                ('camera_fov_h', 45.0),
             ]
         )
 
         self.srt_uri = self.get_parameter('srt_uri').value
         self.srt_latency = self.get_parameter('srt_latency').value
         self.marker_timeout = self.get_parameter('marker_timeout').value
+        self.camera_fov_w = self.get_parameter('camera_fov_w').value
+        self.camera_fov_h = self.get_parameter('camera_fov_h').value
 
         # srtsrc latency is in milliseconds; convert to seconds for scheduling.
         self.srt_latency_sec = self.srt_latency / 1000.0
