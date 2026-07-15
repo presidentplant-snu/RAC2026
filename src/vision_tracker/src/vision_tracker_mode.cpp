@@ -9,6 +9,9 @@ VisionTrackerMode::VisionTrackerMode(rclcpp::Node & node)
 {
     declareParameters();
 
+    // Skip the FMU<->ROS message version handshake, matching the mission runner.
+    setSkipMessageCompatibilityCheck();
+
     _trajectory_setpoint  = std::make_shared<px4_ros2::TrajectorySetpointType>(*this);
     _vehicle_local_position = std::make_shared<px4_ros2::OdometryLocalPosition>(*this);
 
@@ -200,7 +203,7 @@ void VisionTrackerMode::updateSetpoint(float dt_s)
             break;
 
         default:
-			break;
+	    break;
     }
 }
 
