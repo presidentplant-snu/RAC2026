@@ -20,9 +20,8 @@ class SIYIPipeline(VideoPipelineBase):
       
         t. ! queue max-size-buffers=2 ! {decoder} ! videoconvert ! video/x-raw,format=BGR ! 
         appsink emit-signals=true sync=false max-buffers=2 drop=true name=sink
+        t. ! queue max-size-buffers=2 ! mpegtsmux alignment=7 ! srtsink uri="{target_ip}" mode=caller sync=false 
         """
-        #   t. ! queue max- size-buffers=2 !  mpegtsmux ! srtsink uri="{target_ip}" mode=caller sync=false 
-        # removed this for now.
         self.pipeline = Gst.parse_launch(pipeline_str)
         appsink = self.pipeline.get_by_name("sink")
 
