@@ -40,7 +40,8 @@ class VisionProcessorNode(Node):
         if self.use_gazebo:
             self.pipeline = GazeboPipeline()
         else:
-            self.pipeline = SIYIPipeline(target_ip=self.srt_uri, hw_accel=True)
+            self.pipeline = SIYIPipeline(source_uri=self.siyi_uri,
+                                         target_ip=self.srt_uri, hw_accel=self.hw_accel)
         
         self.pipeline_thread = threading.Thread(target=self.pipeline.run, daemon=True)
         self.pipeline_thread.start()
@@ -75,6 +76,11 @@ class VisionProcessorNode(Node):
                 ('use_gazebo', False),
                 ('show_debug', False),
                 ('patient_model_path', ''),
+                # RTSP source the SIYI pipeline pulls the camera stream from.
+                ('siyi_uri', 'rtsp://192.168.144.25:8554/main.264'),
+                # Use the hardware H.265 decoder (v4l2h265dec) in the SIYI
+                # pipeline; set false to fall back to software decodebin.
+                ('hw_accel', True),
                 # SRT endpoint the SIYI pipeline re-streams to (srtsink, caller);
                 # the stream_viewer reads the same URI as its srtsrc listener.
                 ('srt_uri', 'srt://192.168.10.36:5000'),
@@ -93,6 +99,8 @@ class VisionProcessorNode(Node):
         self.use_gazebo = self.get_parameter('use_gazebo').value
         self.show_debug = self.get_parameter('show_debug').value
         self.patient_model_path = self.get_parameter('patient_model_path').value
+        self.siyi_uri = self.get_parameter('siyi_uri').value
+        self.hw_accel = self.get_parameter('hw_accel').value
         self.srt_uri = self.get_parameter('srt_uri').value
 
         self.camera_w = self.get_parameter('camera_width').value

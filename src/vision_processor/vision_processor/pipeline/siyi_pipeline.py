@@ -5,7 +5,8 @@ gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GLib
 
 class SIYIPipeline(VideoPipelineBase):
-    def __init__(self, target_ip: str = "srt://192.168.10.36:5000", hw_accel: bool = False) -> None:
+    def __init__(self, source_uri: str = "rtsp://192.168.144.25:8554/main.264",
+                 target_ip: str = "srt://192.168.10.36:5000", hw_accel: bool = False) -> None:
         VideoPipelineBase.__init__(self)
 
         decoder = "v4l2h265dec" if hw_accel else "decodebin"
@@ -14,7 +15,7 @@ class SIYIPipeline(VideoPipelineBase):
         # detection; the other re-muxes to MPEG-TS and re-streams over SRT
         # (srtsink, caller) for the stream_viewer, which parses h265.
         pipeline_str = f"""
-        rtspsrc location=rtsp://192.168.144.25:8554/main.264 latency=0 !
+        rtspsrc location={source_uri} latency=0 !
         rtph265depay ! h265parse config-interval=1 ! tee name=t
 
         t. ! queue max-size-buffers=2 ! {decoder} ! videoconvert ! video/x-raw,format=BGR !
@@ -39,5 +40,6 @@ class SIYIPipeline(VideoPipelineBase):
 
 if __name__ == "__main__":
     Gst.init(None)
-    siyiPipeline = SIYIPipeline(target_ip="srt://192.168.10.36:5000")
+    siyiPipeline = SIYIPipeline(source_uri="rtsp://192.168.144.25:8554/main.264",
+                                target_ip="srt://192.168.10.36:5000")
     siyiPipeline.run()

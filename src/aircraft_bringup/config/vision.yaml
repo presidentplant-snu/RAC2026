@@ -16,6 +16,11 @@
     camera_offset_x: 0.0
     camera_offset_y: 0.0
 
+    # --- SIYI camera source ---
+    # RTSP endpoint the SIYI pipeline pulls the camera stream from. Only used by
+    # the vision_processor when use_gazebo is false.
+    siyi_uri: "rtsp://192.168.144.25:8554/main.264"
+
     # --- Shared SRT link ---
     # The SIYI pipeline re-streams the camera to this endpoint (srtsink, caller)
     # and the stream_viewer reads from it (srtsrc, listener). On the vision
@@ -27,6 +32,9 @@
     use_gazebo: true
     # Show the annotated debug window.
     show_debug: true
+    # Hardware H.265 decode (v4l2h265dec) for the SIYI pipeline; false uses
+    # software decodebin. Only applies when use_gazebo is false.
+    hw_accel: true
     # Patient ONNX model (empty string disables patient detection). Models ship
     # in aircraft_bringup/models/; set this to that file's path to enable.
     patient_model_path: ""

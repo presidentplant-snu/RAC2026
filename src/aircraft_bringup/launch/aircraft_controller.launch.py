@@ -1,7 +1,9 @@
 """Bring up the aircraft controller stack.
 
+Requires MicroXRCEAgent to be running separately (e.g. `MicroXRCEAgent udp4
+-p 8888`); it is intentionally not launched here.
+
 Launches:
-  - MicroXRCEAgent (udp4 -p 8888)
   - translation_node
   - vision_tracker         (tuning params from config/vision_tracker.yaml)
   - aircraft_controller (mission_runner)
@@ -21,7 +23,7 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -47,11 +49,6 @@ def generate_launch_description():
     )
 
     mission_file = PathJoinSubstitution([pkg_share, 'missions', mission])
-
-    micro_xrce_agent = ExecuteProcess(
-        cmd=['MicroXRCEAgent', 'udp4', '-p', '8888'],
-        output='screen',
-    )
 
     translation_node = Node(
         package='translation_node',
@@ -87,7 +84,6 @@ def generate_launch_description():
     return LaunchDescription([
         declare_logging,
         declare_mission,
-        micro_xrce_agent,
         translation_node,
         vision_tracker,
         aircraft_controller,
