@@ -4,6 +4,7 @@ from rclpy.qos import QoSPresetProfiles
 
 from aircraft_msgs.msg import CameraTrackedObject
 
+import math
 import threading
 import time
 from collections import deque
@@ -70,6 +71,10 @@ class StreamViewerNode(Node):
         self.srt_latency_sec = self.srt_latency / 1000.0
 
     def _tracked_object_callback(self, msg):
+        # tan_x is NaN when the processor had no detection: drop it so a recent
+        # valid marker stays on screen until marker_timeout expires.
+        if math.isnan(msg.tan_x):
+            return
         # Defer overlay until the matching (latency-buffered) frame is shown.
         self.pending_objects.append((time.monotonic(), msg))
 
@@ -92,7 +97,9 @@ class StreamViewerNode(Node):
 
         frame = frame.copy()
 
+        # tan_x is NaN when the processor had no detection — nothing to overlay.
         if self.tracked_object is not None and \
+                not math.isnan(self.tracked_object.tan_x) and \
                 time.monotonic() - self.tracked_object_time < self.marker_timeout:
             h, w = frame.shape[:2]
             x, y = self.angle_to_pixel(
@@ -108,10 +115,13 @@ class StreamViewerNode(Node):
         cv.waitKey(1)
 
     def angle_to_pixel(self, tan_x, tan_y, w, h):
-        # Inverse of pixel_to_angle in vision_processor.py
+        # Inverse of pixel_to_angle in vision_processor.py (pinhole model):
+        # pixel = center + tan * fx, with fx = (w/2) / tan(fov_w/2).
+        fx = (w / 2) / np.tan(np.deg2rad(self.camera_fov_w) / 2)
+        fy = (h / 2) / np.tan(np.deg2rad(self.camera_fov_h) / 2)
 
-        x = w/2 + np.rad2deg(np.arctan(tan_x)) * (w / self.camera_fov_w)
-        y = h/2 - np.rad2deg(np.arctan(tan_y)) * (h / self.camera_fov_h)
+        x = w/2 + tan_x * fx
+        y = h/2 - tan_y * fy
 
         return int(x), int(y)
 

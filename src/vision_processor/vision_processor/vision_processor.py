@@ -119,28 +119,29 @@ class VisionProcessorNode(Node):
         end_time = 0
 
         if self.aircraft_state is None:
-            print("no state")
+            self.get_logger().warn("No aircraft state received yet",
+                                   throttle_duration_sec=1.0)
             return
 
-        self.frame = self.pipeline.get_frame() 
+        self.frame = self.pipeline.get_frame()
         if self.frame is None:
-            print("no frame")
+            self.get_logger().warn("No frame available from pipeline",
+                                   throttle_duration_sec=1.0)
             return
 
         if self.show_debug:
             start_time = time.perf_counter()
 
         detection = None
+        marker_color = None
         match self.aircraft_state.track_type:
             case AircraftState.TRACK_PATIENT:
                 if self.patient_detector is not None:
                     detection = self.patient_detector.detect(self.frame)
-                    if detection is not None:
-                        cv.circle(self.frame, (int(detection[0]), int(detection[1])), 50, (255, 0, 0), 15)
+                    marker_color = (255, 0, 0)
             case AircraftState.TRACK_ARUCO:
                 detection = self.aruco_detector.detect(self.frame)
-                if detection is not None:
-                    cv.circle(self.frame, (int(detection[0]), int(detection[1])), 50, (0, 0, 255), 15)
+                marker_color = (0, 0, 255)
             case _:
                 pass
 
@@ -164,7 +165,13 @@ class VisionProcessorNode(Node):
                         f"Detection took {execution_time:.5f}s",
                         throttle_duration_sec=1.0
                     )
-            cv.imshow("Debug", self.frame)
+            # Draw on a copy: the pipeline hands out a reference to its stored
+            # frame, and the next detection may run on the same frame again.
+            debug_frame = self.frame.copy()
+            if detection is not None and marker_color is not None:
+                cv.circle(debug_frame, (int(detection[0]), int(detection[1])),
+                          50, marker_color, 15)
+            cv.imshow("Debug", debug_frame)
             cv.waitKey(1)
 
         self.tracked_object_publisher.publish(self.tracked_object)
@@ -184,12 +191,18 @@ class VisionProcessorNode(Node):
         cv.destroyAllWindows()
 
     def pixel_to_angle(self, x, y):
-        # Up / Right is +ve
+        # Up / Right is +ve. Pinhole (rectilinear) model: a standard lens is
+        # linear in tan(angle), not in angle, so map pixel offset directly to a
+        # tangent via the focal length fx = (w/2) / tan(fov_w/2).
+        fx = (self.camera_w / 2) / np.tan(np.deg2rad(self.camera_fov_w) / 2)
+        fy = (self.camera_h / 2) / np.tan(np.deg2rad(self.camera_fov_h) / 2)
 
-        angle_x = np.tan(np.deg2rad((x-self.camera_w/2) * (self.camera_fov_w / self.camera_w)))
-        angle_y = -np.tan(np.deg2rad((y-self.camera_h/2) * (self.camera_fov_h / self.camera_h)))
-        
-        return angle_x, angle_y
+        tan_x = (x - self.camera_w / 2) / fx
+        tan_y = -(y - self.camera_h / 2) / fy
+
+        # Cast to Python float: NumPy scalars (np.float32 under NEP 50) are not
+        # float subclasses and fail the generated ROS setter's isinstance check.
+        return float(tan_x), float(tan_y)
 
 def main(args=None):
     rclpy.init(args=args)

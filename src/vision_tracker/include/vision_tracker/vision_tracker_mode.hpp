@@ -9,6 +9,12 @@
 
 static const std::string mode_name = "Vision Tracker";
 
+// Latched (transient_local) topic where the vision tracker publishes the mode
+// ID assigned by the FMU at registration. The mission runner's
+// visionTrackerMode action reads it instead of assuming a fixed ID, since IDs
+// depend on registration order.
+static const std::string kModeIdTopicName = "/vision_tracker/mode_id";
+
 // ------------------------------------------------------------------
 // 2D slew rate limiter (XY only)
 // Limits velocity and acceleration of a position setpoint, and applies

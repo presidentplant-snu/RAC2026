@@ -19,6 +19,9 @@
     # --- SIYI camera source ---
     # RTSP endpoint the SIYI pipeline pulls the camera stream from. Only used by
     # the vision_processor when use_gazebo is false.
+    # NOTE: this deliberately differs from the SIYI factory default
+    # (192.168.144.25) — the camera sits on the 192.168.149.x subnet in this
+    # setup, so the code defaults do not apply here.
     siyi_uri: "rtsp://192.168.149.4:8554/main.264"
 
     # --- Shared SRT link ---
@@ -29,9 +32,9 @@
 
     # --- vision_processor ---
     # Use the Gazebo UDP pipeline instead of the SIYI camera.
-    use_gazebo: false
+    use_gazebo: true
     # Show the annotated debug window.
-    show_debug: false
+    show_debug: true
     # Hardware H.265 decode (v4l2h265dec) for the SIYI pipeline; false uses
     # software decodebin. Only applies when use_gazebo is false.
     hw_accel: true

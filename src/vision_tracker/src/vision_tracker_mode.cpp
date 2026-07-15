@@ -163,8 +163,9 @@ void VisionTrackerMode::updateSetpoint(float dt_s)
         // ----------------------------------------------------------------
         // Slow precise XY correction at fine_alt, still tracking.
         case State::FineApproach: {
-            if (!isTargetValid &&
-                (_node.get_clock()->now() - targetTimestamp).seconds() > fineApproachTimeoutLimit)
+            // Timestamp-based (not isTargetValid) so a dead publisher — which
+            // never sends the invalidating NaN message — also times out here.
+            if ((_node.get_clock()->now() - targetTimestamp).seconds() > fineApproachTimeoutLimit)
             {
                 RCLCPP_ERROR(_node.get_logger(), "Target lost during FineApproach");
                 completed(px4_ros2::Result::Timeout);

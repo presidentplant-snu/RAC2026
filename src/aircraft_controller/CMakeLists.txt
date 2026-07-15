@@ -18,6 +18,7 @@ find_package(rclcpp REQUIRED)
 find_package(px4_ros2_cpp REQUIRED)
 find_package(px4_msgs REQUIRED)
 find_package(aircraft_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(vision_tracker REQUIRED)
 
 include_directories(include)
@@ -33,6 +34,7 @@ ament_target_dependencies(mission_runner
     rclcpp
     px4_msgs
     aircraft_msgs
+    std_msgs
 	vision_tracker
     px4_ros2_cpp
     Eigen3

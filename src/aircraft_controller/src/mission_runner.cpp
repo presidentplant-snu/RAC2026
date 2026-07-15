@@ -53,13 +53,11 @@ void MissionRunnerNode::init()
 	px4_ros2::MissionExecutor::Configuration config;
 	
 	// TODO: Test VTOL Trajectory Executor
-	config.withTrajectoryExecutor<VTOLTrajectoryExecutor>(_aircraft_state);
+	config.withTrajectoryExecutor<VTOLTrajectoryExecutor>();
 
 	// =================================================================
-	// Register custom actions 
-	constexpr uint8_t vision_tracker_mode_id = 23;
-
-	config.addCustomAction<VisionTrackerModeAction>(vision_tracker_mode_id);
+	// Register custom actions
+	config.addCustomAction<VisionTrackerModeAction>();
 	config.addCustomAction<VTOLForwardTransitionAction>();
 	config.addCustomAction<VTOLBackTransitionAction>();
 	config.addCustomAction<UpdateAircraftStateAction>(_aircraft_state);

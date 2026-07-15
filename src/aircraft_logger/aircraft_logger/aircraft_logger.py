@@ -39,10 +39,12 @@ class LogEntry:
 
 class AircraftLogger(Node):
 
-    def __init__(self, log_path: str="/app/flight_logs/") -> None:
+    def __init__(self) -> None:
         super().__init__("aircraft_logger")
-        
-        self.do_logging = False 
+
+        log_path = self.declare_parameter("log_path", "/app/flight_logs/").value
+
+        self.do_logging = False
 
         self.vehicle_local_pos = VehicleLocalPosition()
         self.vehicle_attitude = VehicleAttitude()
@@ -134,8 +136,6 @@ class AircraftLogger(Node):
                 yaw = yaw
             )
 
-        print(log_entry)
-
         self.log_writer.writerow(log_entry.format())
         self.log_file.flush()
     
@@ -161,12 +161,15 @@ class AircraftLogger(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    
-    aircraft_logger = AircraftLogger(log_path="/app/flight_logs/")
-    
+
+    aircraft_logger = AircraftLogger()
+
     aircraft_logger.do_logging = True
-    rclpy.spin(aircraft_logger)
-
-
-    aircraft_logger.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(aircraft_logger)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        aircraft_logger.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()

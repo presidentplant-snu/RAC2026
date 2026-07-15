@@ -42,6 +42,9 @@ void FixedWingTrajectoryExecutor::updateSetpoint()
 
 	if (!_vehicle_global_position->positionValid()) {
 		RCLCPP_ERROR(_node.get_logger(), "Global position not valid, aborting");
+		// Stop the trajectory so on_failure (mission abort) fires once instead
+		// of on every setpoint update until the mode is deactivated.
+		_current_index.reset();
 		_current_trajectory.on_failure();
 		return;
 	}

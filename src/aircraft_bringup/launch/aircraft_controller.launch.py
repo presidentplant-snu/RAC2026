@@ -85,7 +85,6 @@ def generate_launch_description():
         declare_logging,
         declare_mission,
         translation_node,
-        vision_tracker,
         aircraft_controller,
         aircraft_logger,
     ])

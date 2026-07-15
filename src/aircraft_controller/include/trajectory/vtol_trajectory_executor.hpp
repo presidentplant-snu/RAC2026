@@ -16,11 +16,8 @@
 class VTOLTrajectoryExecutor: public px4_ros2::TrajectoryExecutorInterface
 {
 	public:
-		explicit VTOLTrajectoryExecutor(px4_ros2::ModeBase & mode,
-				std::shared_ptr<aircraft_msgs::msg::AircraftState> aircraft_state)
-			: _node(mode.node()),
-			_aircraft_state(aircraft_state)
-
+		explicit VTOLTrajectoryExecutor(px4_ros2::ModeBase & mode)
+			: _node(mode.node())
 	{
 		_mc_trajectory_executor = std::make_shared<px4_ros2::multicopter::WaypointTrajectoryExecutor>(mode, 2.0f);
 		_fw_trajectory_executor = std::make_shared<FixedWingTrajectoryExecutor>(mode, 4.0f, 4.0f);
@@ -42,7 +39,17 @@ class VTOLTrajectoryExecutor: public px4_ros2::TrajectoryExecutorInterface
 			if (auto* exec = activeExecutor()) exec->updateSetpoint();
 		}
 		void runTrajectory(const px4_ros2::TrajectoryExecutorInterface::TrajectoryConfig & config) override {
-			if (auto* exec = activeExecutor()) exec->runTrajectory(config);
+			if (auto* exec = activeExecutor()) {
+				exec->runTrajectory(config);
+			} else {
+				// Can only happen if the mission is activated before the first
+				// vtol_vehicle_status arrives or while already transitioning
+				// (normal flow settles the state before each navigation item).
+				// The trajectory is dropped and the mission stalls.
+				RCLCPP_ERROR(_node.get_logger(),
+						"runTrajectory called while VTOL state is undefined (transitioning?), "
+						"dropping trajectory — mission will not progress");
+			}
 		}
 
 	private:
@@ -70,6 +77,4 @@ class VTOLTrajectoryExecutor: public px4_ros2::TrajectoryExecutorInterface
 
 		std::shared_ptr<px4_ros2::TrajectoryExecutorInterface> _mc_trajectory_executor;
 		std::shared_ptr<px4_ros2::TrajectoryExecutorInterface> _fw_trajectory_executor;
-
-		std::shared_ptr<aircraft_msgs::msg::AircraftState> _aircraft_state;
 };

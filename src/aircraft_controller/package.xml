@@ -19,6 +19,7 @@
   <depend>translation_node</depend>
   <depend>px4_msgs</depend>
   <depend>aircraft_msgs</depend>
+  <depend>std_msgs</depend>
   <depend>vision_tracker</depend>
 
   <exec_depend>aircraft_logger</exec_depend>

@@ -41,15 +41,15 @@ public:
     );
     _heading_target = px4_ros2::degToRad(arguments.at<float>("heading"));
 
-    if (arguments.contains("positionPrecision")) {
-      _position_error_threshold = arguments.at<float>("positionPrecision");
-    }
-    if (arguments.contains("headingPrecision")) {
-      _heading_error_threshold = px4_ros2::degToRad(arguments.at<float>("headingPrecision"));
-    }
-    if (arguments.contains("dwellTime")) {
-      _dwell_time_s = arguments.at<float>("dwellTime");
-    }
+    // The action instance is reused across mission items, so fall back to the
+    // defaults whenever an argument is absent instead of keeping the previous
+    // item's value.
+    _position_error_threshold = arguments.contains("positionPrecision")
+      ? arguments.at<float>("positionPrecision") : kDefaultPositionErrorThreshold;
+    _heading_error_threshold = arguments.contains("headingPrecision")
+      ? px4_ros2::degToRad(arguments.at<float>("headingPrecision")) : kDefaultHeadingErrorThreshold;
+    _dwell_time_s = arguments.contains("dwellTime")
+      ? arguments.at<float>("dwellTime") : kDefaultDwellTimeS;
 
     _converged_since.reset();
 
@@ -127,7 +127,11 @@ private:
   rclcpp::TimerBase::SharedPtr _timer;
   std::optional<rclcpp::Time> _converged_since;
 
-  float _position_error_threshold = 1.0f;
-  float _heading_error_threshold = 5.0_deg;
-  float _dwell_time_s = 3.0f;
+  static constexpr float kDefaultPositionErrorThreshold = 1.0f;
+  static constexpr float kDefaultHeadingErrorThreshold = 5.0_deg;
+  static constexpr float kDefaultDwellTimeS = 3.0f;
+
+  float _position_error_threshold = kDefaultPositionErrorThreshold;
+  float _heading_error_threshold = kDefaultHeadingErrorThreshold;
+  float _dwell_time_s = kDefaultDwellTimeS;
 };
