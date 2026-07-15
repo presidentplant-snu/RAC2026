@@ -4,7 +4,7 @@ import cv2 as cv
 class ArucoDetector():
     def __init__(self):
 
-        self.dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_APRILTAG_36h10)
+        self.dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_4X4_50)
         self.params = cv.aruco.DetectorParameters_create()
 
 

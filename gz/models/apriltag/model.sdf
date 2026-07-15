@@ -15,8 +15,8 @@
 					<specular>0.4 0.4 0.4 1</specular>
 					<pbr>
 						<metal>
-							<albedo_map>model://apriltag/apriltag.png</albedo_map>
-							<emissive_map>model://apriltag/apriltag.png</emissive_map>
+							<albedo_map>model://apriltag/apriltag2.png</albedo_map>
+							<emissive_map>model://apriltag/apriltag2.png</emissive_map>
 						</metal>
 					</pbr>
 				</material>
