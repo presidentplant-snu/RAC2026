@@ -4,7 +4,7 @@ project(aircraft_bringup)
 find_package(ament_cmake REQUIRED)
 
 install(
-    DIRECTORY launch missions config
+    DIRECTORY launch missions config models
     DESTINATION share/${PROJECT_NAME}
 )
 

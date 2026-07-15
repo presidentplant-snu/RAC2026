@@ -74,8 +74,7 @@ class VisionProcessorNode(Node):
             parameters=[
                 ('use_gazebo', False),
                 ('show_debug', False),
-                ('patient_model_path',
-                 '/home/radxa/RAC2026/model/yolo26n_1280_3out_int8.onnx'),
+                ('patient_model_path', ''),
                 # SRT endpoint the SIYI pipeline re-streams to (srtsink, caller);
                 # the stream_viewer reads the same URI as its srtsrc listener.
                 ('srt_uri', 'srt://192.168.10.36:5000'),

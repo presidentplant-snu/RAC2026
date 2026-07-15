@@ -24,11 +24,12 @@
 
     # --- vision_processor ---
     # Use the Gazebo UDP pipeline instead of the SIYI camera.
-    use_gazebo: false
+    use_gazebo: true
     # Show the annotated debug window.
-    show_debug: false
-    # Patient ONNX model (empty string disables patient detection).
-    patient_model_path: "/home/radxa/RAC2026/model/yolo26n_1280_3out_int8.onnx"
+    show_debug: true
+    # Patient ONNX model (empty string disables patient detection). Models ship
+    # in aircraft_bringup/models/; set this to that file's path to enable.
+    patient_model_path: ""
 
     # --- stream_viewer ---
     # srtsrc receive-buffer latency in ms, also used to delay the overlay.

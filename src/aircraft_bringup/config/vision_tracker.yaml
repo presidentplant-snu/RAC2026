@@ -7,9 +7,9 @@
     cam_tracked_obj_topic: "/camera_tracked_object"
 
     # Altitudes (m above target)
-    approach_alt: 13.0
-    fine_alt: 6.5
-    descend_alt: 3.5
+    approach_alt: 10.0
+    fine_alt: 5.0
+    descend_alt: 3.0
 
     # Timeouts (s)
     target_timeout: 2.0
@@ -19,13 +19,13 @@
     use_distance_sensor: false
 
     # Velocity / acceleration profiles
-    fast_v_max: 2.0     # Approach + DescendToFine
-    fast_a_max: 0.5
+    fast_v_max: 1.0     # Approach + DescendToFine
+    fast_a_max: 0.2
     slow_v_max: 0.15    # FineApproach
     slow_a_max: 0.05
 
     # Z descent rate (m/s, positive = downward command magnitude)
-    descend_vel: 0.5
+    descend_vel: 0.2
 
     # Position / velocity thresholds
     approach_pos_threshold: 0.5
