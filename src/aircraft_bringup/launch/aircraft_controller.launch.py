@@ -3,29 +3,50 @@
 Launches:
   - MicroXRCEAgent (udp4 -p 8888)
   - translation_node
-  - vision_tracker
+  - vision_tracker         (tuning params from config/vision_tracker.yaml)
   - aircraft_controller (mission_runner)
   - aircraft_logger        (only when logging:=true)
 
-Set the `logging` launch argument to also bring up the logger:
-    ros2 launch aircraft_controller aircraft_controller.launch.py logging:=true
+Launch arguments:
+    mission   mission JSON file to run, resolved against this package's
+              missions/ directory (default: vtol_fw_mission.json)
+    logging   also bring up aircraft_logger when true (default: false)
+
+Example:
+    ros2 launch aircraft_bringup aircraft_controller.launch.py \
+        mission:=precland.json logging:=true
 """
 
+import os
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    pkg_share = get_package_share_directory('aircraft_bringup')
+    vision_config = os.path.join(pkg_share, 'config', 'vision_tracker.yaml')
+
     logging = LaunchConfiguration('logging')
+    mission = LaunchConfiguration('mission')
 
     declare_logging = DeclareLaunchArgument(
         'logging',
         default_value='false',
         description='Also launch aircraft_logger when true.',
     )
+
+    declare_mission = DeclareLaunchArgument(
+        'mission',
+        default_value='vtol_fw_mission.json',
+        description='Mission JSON file, resolved against the package missions/ dir.',
+    )
+
+    mission_file = PathJoinSubstitution([pkg_share, 'missions', mission])
 
     micro_xrce_agent = ExecuteProcess(
         cmd=['MicroXRCEAgent', 'udp4', '-p', '8888'],
@@ -44,6 +65,7 @@ def generate_launch_description():
         executable='vision_tracker',
         name='vision_tracker',
         output='screen',
+        parameters=[vision_config],
     )
 
     aircraft_controller = Node(
@@ -51,6 +73,7 @@ def generate_launch_description():
         executable='mission_runner',
         name='mission_runner',
         output='screen',
+        parameters=[{'mission_file': mission_file}],
     )
 
     aircraft_logger = Node(
@@ -63,6 +86,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         declare_logging,
+        declare_mission,
         micro_xrce_agent,
         translation_node,
         vision_tracker,

@@ -3,15 +3,21 @@
 Launches:
   - MicroXRCEAgent (udp4 -p 8888)
   - translation_node
-  - vision_tracker
+  - vision_tracker         (tuning params from config/vision_tracker.yaml)
 """
 
+import os
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    pkg_share = get_package_share_directory('aircraft_bringup')
+    vision_config = os.path.join(pkg_share, 'config', 'vision_tracker.yaml')
+
     micro_xrce_agent = ExecuteProcess(
         cmd=['MicroXRCEAgent', 'udp4', '-p', '8888'],
         output='screen',
@@ -29,6 +35,7 @@ def generate_launch_description():
         executable='vision_tracker',
         name='vision_tracker',
         output='screen',
+        parameters=[vision_config],
     )
 
     return LaunchDescription([

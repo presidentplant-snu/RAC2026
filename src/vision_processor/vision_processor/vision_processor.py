@@ -87,7 +87,6 @@ class VisionProcessorNode(Node):
         self.use_gazebo = self.get_parameter('use_gazebo').value
         self.show_debug = self.get_parameter('show_debug').value
         self.patient_model_path = self.get_parameter('patient_model_path').value
-        self.show_debug = True # TEMP
         
 
     def _aircraft_state_callback(self, msg):

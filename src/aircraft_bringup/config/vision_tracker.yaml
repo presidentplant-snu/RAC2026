@@ -1,0 +1,35 @@
+# Vision tracker tuning parameters.
+# Applied to the vision_tracker node via the launch files. Values here match the
+# in-code defaults; edit and relaunch (no rebuild needed) to retune.
+/**:
+  ros__parameters:
+    # Camera tracked-object subscription
+    cam_tracked_obj_topic: "/camera_tracked_object"
+
+    # Altitudes (m above target)
+    approach_alt: 13.0
+    fine_alt: 6.5
+    descend_alt: 3.5
+
+    # Timeouts (s)
+    target_timeout: 2.0
+    fine_approach_timeout: 5.0
+
+    # Use downward distance sensor for height instead of local Z
+    use_distance_sensor: false
+
+    # Velocity / acceleration profiles
+    fast_v_max: 2.0     # Approach + DescendToFine
+    fast_a_max: 0.5
+    slow_v_max: 0.15    # FineApproach
+    slow_a_max: 0.05
+
+    # Z descent rate (m/s, positive = downward command magnitude)
+    descend_vel: 0.5
+
+    # Position / velocity thresholds
+    approach_pos_threshold: 0.5
+    approach_vel_threshold: 0.3
+    fine_pos_threshold: 0.2
+    fine_vel_threshold: 0.2
+    final_alt_threshold: 0.15

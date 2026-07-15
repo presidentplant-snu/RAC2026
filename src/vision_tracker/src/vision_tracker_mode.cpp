@@ -7,6 +7,8 @@ VisionTrackerMode::VisionTrackerMode(rclcpp::Node & node)
     : ModeBase(node, Settings{mode_name}.userSelectable(true))
     , _node(node)
 {
+    declareParameters();
+
     _trajectory_setpoint  = std::make_shared<px4_ros2::TrajectorySetpointType>(*this);
     _vehicle_local_position = std::make_shared<px4_ros2::OdometryLocalPosition>(*this);
 
@@ -15,6 +17,42 @@ VisionTrackerMode::VisionTrackerMode(rclcpp::Node & node)
         [this](const aircraft_msgs::msg::CameraTrackedObject::SharedPtr msg) {
             this->trackedObjectCallback(msg);
         });
+}
+
+void VisionTrackerMode::declareParameters()
+{
+    // Helper: declare a float parameter using the current member value as the
+    // default and return the resolved value (params are stored as double).
+    auto declare_f = [this](const std::string & name, float def) {
+        return static_cast<float>(_node.declare_parameter<double>(name, def));
+    };
+
+    _cam_tracked_obj_topic_name =
+        _node.declare_parameter<std::string>("cam_tracked_obj_topic",
+                                             _cam_tracked_obj_topic_name);
+
+    approach_alt = declare_f("approach_alt", approach_alt);
+    fine_alt     = declare_f("fine_alt", fine_alt);
+    descend_alt  = declare_f("descend_alt", descend_alt);
+
+    timeoutLimit             = declare_f("target_timeout", timeoutLimit);
+    fineApproachTimeoutLimit = declare_f("fine_approach_timeout", fineApproachTimeoutLimit);
+
+    use_distance_sensor =
+        _node.declare_parameter<bool>("use_distance_sensor", use_distance_sensor);
+
+    fast_v_max = declare_f("fast_v_max", fast_v_max);
+    fast_a_max = declare_f("fast_a_max", fast_a_max);
+    slow_v_max = declare_f("slow_v_max", slow_v_max);
+    slow_a_max = declare_f("slow_a_max", slow_a_max);
+
+    descend_vel = declare_f("descend_vel", descend_vel);
+
+    approach_pos_threshold = declare_f("approach_pos_threshold", approach_pos_threshold);
+    approach_vel_threshold = declare_f("approach_vel_threshold", approach_vel_threshold);
+    fine_pos_threshold     = declare_f("fine_pos_threshold", fine_pos_threshold);
+    fine_vel_threshold     = declare_f("fine_vel_threshold", fine_vel_threshold);
+    final_alt_threshold    = declare_f("final_alt_threshold", final_alt_threshold);
 }
 
 void VisionTrackerMode::onActivate()
@@ -89,7 +127,7 @@ void VisionTrackerMode::updateSetpoint(float dt_s)
 
             Eigen::Vector3f target3 = _target_pos_ned;
             target3(2) = z_target;
-            if (positionReached(target3, approach_pos_threshold)) {
+            if (positionReached(target3, approach_pos_threshold, approach_vel_threshold)) {
                 switchToState(State::DescendToFine);
             }
             break;
@@ -109,7 +147,7 @@ void VisionTrackerMode::updateSetpoint(float dt_s)
 
             Eigen::Vector3f target3 = _target_pos_ned;
             target3(2) = z_target;
-            if (positionReached(target3, approach_pos_threshold)) {
+            if (positionReached(target3, approach_pos_threshold, approach_vel_threshold)) {
                 switchToState(State::FineApproach);
             }
             break;
@@ -131,7 +169,7 @@ void VisionTrackerMode::updateSetpoint(float dt_s)
 
             Eigen::Vector3f target3 = _target_pos_ned;
             target3(2) = z_target;
-            if (positionReached(target3, fine_pos_threshold)) {
+            if (positionReached(target3, fine_pos_threshold, fine_vel_threshold)) {
                 switchToState(State::Descend);
             }
             break;

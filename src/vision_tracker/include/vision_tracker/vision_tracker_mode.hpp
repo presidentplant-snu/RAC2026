@@ -8,7 +8,6 @@
 #include <aircraft_msgs/msg/camera_tracked_object.hpp>
 
 static const std::string mode_name = "Vision Tracker";
-static const std::string _cam_tracked_obj_topic_name = "/camera_tracked_object";
 
 // ------------------------------------------------------------------
 // 2D slew rate limiter (XY only)
@@ -81,7 +80,9 @@ public:
     void onDeactivate() override;
     void updateSetpoint(float dt_s) override;
 
-    // TODO: Convert all of these to ROS2 parameters.
+    // Tuning constants below. All are overridable via ROS 2 parameters declared
+    // in the constructor; the initializers here are the defaults used when a
+    // parameter is not provided. See config/vision_tracker.yaml in aircraft_bringup.
 
     // Altitudes (m above target)
     float approach_alt{13.0f};
@@ -114,7 +115,12 @@ private:
     std::shared_ptr<px4_ros2::OdometryLocalPosition>  _vehicle_local_position;
 
     rclcpp::Node& _node;
+    std::string _cam_tracked_obj_topic_name{"/camera_tracked_object"};
     rclcpp::Subscription<aircraft_msgs::msg::CameraTrackedObject>::SharedPtr _cam_tracked_obj_sub;
+
+    // Declares each tuning constant as a ROS 2 parameter, using the current
+    // member value as the default, and writes the resolved value back.
+    void declareParameters();
 
     rclcpp::Time    targetTimestamp{0, 0, RCL_ROS_TIME};
     bool            isTargetValid{false};

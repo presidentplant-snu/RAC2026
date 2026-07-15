@@ -6,6 +6,7 @@ from aircraft_msgs.msg import CameraTrackedObject
 
 import threading
 import time
+from collections import deque
 import numpy as np
 import cv2 as cv
 
@@ -23,13 +24,18 @@ class StreamViewerNode(Node):
         self.tracked_object: CameraTrackedObject | None = None
         self.tracked_object_time: float = 0.0
 
+        # Detections arrive ~real-time, but the SRT stream is buffered by
+        # srt_latency ms. Hold detections in this queue and only overlay them
+        # once srt_latency has elapsed, so markers line up with the video.
+        self.pending_objects: deque[tuple[float, CameraTrackedObject]] = deque()
+
         # Must match the camera parameters in vision_processor.py
         self.camera_fov_w = 80 # degrees
         self.camera_fov_h = 80*9/16 # degrees
 
         self.setup_ros2()
 
-        self.pipeline = SRTPipeline(listen_uri=self.srt_uri)
+        self.pipeline = SRTPipeline(listen_uri=self.srt_uri, latency=self.srt_latency)
         self.pipeline_thread = threading.Thread(target=self.pipeline.run, daemon=True)
         self.pipeline_thread.start()
 
@@ -49,18 +55,35 @@ class StreamViewerNode(Node):
             namespace='',
             parameters=[
                 ('srt_uri', 'srt://:5000'),
+                ('srt_latency', 100),
                 ('marker_timeout', 1.0)
             ]
         )
 
         self.srt_uri = self.get_parameter('srt_uri').value
+        self.srt_latency = self.get_parameter('srt_latency').value
         self.marker_timeout = self.get_parameter('marker_timeout').value
 
+        # srtsrc latency is in milliseconds; convert to seconds for scheduling.
+        self.srt_latency_sec = self.srt_latency / 1000.0
+
     def _tracked_object_callback(self, msg):
-        self.tracked_object = msg
-        self.tracked_object_time = time.monotonic()
+        # Defer overlay until the matching (latency-buffered) frame is shown.
+        self.pending_objects.append((time.monotonic(), msg))
+
+    def _release_due_objects(self):
+        # Promote detections whose matching video frame should now be visible,
+        # i.e. those received at least srt_latency ago.
+        now = time.monotonic()
+        while self.pending_objects and \
+                now - self.pending_objects[0][0] >= self.srt_latency_sec:
+            recv_time, msg = self.pending_objects.popleft()
+            self.tracked_object = msg
+            self.tracked_object_time = recv_time + self.srt_latency_sec
 
     def _display_timer_callback(self):
+        self._release_due_objects()
+
         frame = self.pipeline.get_frame()
         if frame is None:
             return
