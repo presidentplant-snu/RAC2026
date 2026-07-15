@@ -25,7 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'vision_processor = vision_processor.vision_processor:main',
-            'set_track_type = vision_processor.set_track_type:main'
+            'set_track_type = vision_processor.set_track_type:main',
             'stream_viewer = vision_processor.stream_viewer:main'
         ],
     },
