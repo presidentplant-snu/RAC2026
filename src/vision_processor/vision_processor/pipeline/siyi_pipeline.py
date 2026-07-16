@@ -18,9 +18,9 @@ class SIYIPipeline(VideoPipelineBase):
         rtspsrc location={source_uri} latency=0 !
         rtph265depay ! h265parse config-interval=1 ! tee name=t
 
-        t. ! queue max-size-buffers=2 ! {decoder} ! videoconvert ! video/x-raw,format=BGR !
+        t. ! queue leaky=downstream max-size-buffers=2 ! {decoder} ! videoconvert ! video/x-raw,format=BGR !
         appsink emit-signals=true sync=false max-buffers=2 drop=true name=sink
-        t. ! queue max-size-buffers=2 ! mpegtsmux alignment=7 ! srtsink uri="{target_ip}" mode=caller sync=false
+        t. ! queue leaky=downstream max-size-buffers=2 ! mpegtsmux alignment=7 ! srtsink uri="{target_ip}" mode=caller sync=false
         """
         self.pipeline = Gst.parse_launch(pipeline_str)
         appsink = self.pipeline.get_by_name("sink")

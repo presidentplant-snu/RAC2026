@@ -10,9 +10,10 @@ class SRTPipeline(VideoPipelineBase):
 
         self.latency = latency
 
+        # FIX: binding srt on specific ip doesn't work (idk why)
         pipeline_str = f"""
-        srtsrc uri={listen_uri} mode=listener keep-listening=true latency={latency} !
-        queue ! tsdemux ! h265parse ! decodebin ! videoconvert ! video/x-raw,format=BGR !
+        srtsrc uri=srt://:5000 mode=listener keep-listening=true latency={latency} !
+        queue leaky=downstream ! tsdemux ! h265parse ! decodebin ! videoconvert ! video/x-raw,format=BGR !
         appsink emit-signals=true sync=false max-buffers=2 drop=true name=sink
         """
 
